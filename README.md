@@ -28,7 +28,7 @@ Minervia configures Claude Code for knowledge work, not just programming. The te
 
 ```bash
 # Clone the starter kit
-git clone https://github.com/your-username/minervia-starter-kit.git
+git clone https://github.com/aplaceforallmystuff/minervia-starter-kit.git
 
 # Navigate to your Obsidian vault
 cd /path/to/your/obsidian/vault
