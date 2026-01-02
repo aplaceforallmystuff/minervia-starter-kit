@@ -1,5 +1,9 @@
 # Minervia Starter Kit
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Claude Code](https://img.shields.io/badge/Claude-Code-blueviolet)](https://claude.ai/download)
+[![Obsidian](https://img.shields.io/badge/Obsidian-Compatible-7c3aed)](https://obsidian.md)
+
 A co-operating system for human-led knowledge work. Terminal-native AI that treats your Obsidian vault as persistent memory.
 
 **You lead. AI assists. Your vault remembers.**
@@ -7,6 +11,15 @@ A co-operating system for human-led knowledge work. Terminal-native AI that trea
 ## What Is Minervia?
 
 Minervia configures Claude Code for knowledge work, not just programming. The terminal is the point — no cluttered interfaces, no context-switching between apps, just you and a conversation that can actually *do things*.
+
+### ✨ Features
+
+- 📝 **Activity Logging** — Capture session work to daily notes automatically
+- 🎯 **Project Documentation** — Log progress to specific project folders
+- 🔄 **Weekly Reviews** — Process inbox and maintain vault health
+- 🧠 **Decision Frameworks** — Apply mental models before big decisions
+- 🏗️ **Project Templates** — Initialize new projects with proper structure
+- 📖 **Retrospectives** — Learn from wins and failures systematically
 
 ### The Four Pillars
 
@@ -21,8 +34,12 @@ Minervia configures Claude Code for knowledge work, not just programming. The te
 
 ### 1. Prerequisites
 
-- [Claude Code CLI](https://claude.ai/download) installed
-- An Obsidian vault (existing or new)
+| Requirement | Cost | Notes |
+|-------------|------|-------|
+| [Obsidian](https://obsidian.md/download) | **Free** | Download for macOS, Windows, or Linux. Personal use is free forever. |
+| [Claude Code](https://claude.ai/download) | **Paid** | Requires a Claude subscription ($20/month Pro or $200/month Max). Install via `npm install -g @anthropic-ai/claude-code` or download directly. |
+
+> **💡 Already have Claude Pro/Max?** Claude Code is included with your subscription — no additional cost.
 
 ### 2. Install
 
@@ -173,9 +190,15 @@ User asks to do [specific task]
 
 ## Requirements
 
-- macOS, Linux, or Windows (WSL)
-- Claude Code CLI
-- Obsidian (recommended but not required)
+| Platform | Status |
+|----------|--------|
+| macOS | ✅ Fully supported |
+| Linux | ✅ Fully supported |
+| Windows (WSL) | ✅ Supported via WSL |
+
+**Software:**
+- [Obsidian](https://obsidian.md/download) — Free, open-source note-taking app
+- [Claude Code](https://claude.ai/download) — Requires Claude Pro ($20/mo) or Max ($200/mo) subscription
 
 ## License
 
