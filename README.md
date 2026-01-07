@@ -1007,6 +1007,39 @@ User asks to do [specific task]
 3. Step three
 ```
 
+### Create Custom Agents
+
+Agents are more sophisticated than skills — they can orchestrate multiple other agents, apply mental models, and handle complex multi-step workflows.
+
+Add agents to `.claude/agents/your-agent.md`:
+
+```markdown
+---
+name: your-agent
+description: Brief description of what this agent does
+tools: Read, Write, Grep, Glob, Bash, Task
+model: sonnet
+---
+
+<role>
+What this agent does and how it operates.
+</role>
+
+<workflow>
+Step-by-step process the agent follows.
+</workflow>
+```
+
+**Example: Workflow Coordinator**
+
+The starter kit includes a `workflow-coordinator` agent that demonstrates multi-agent orchestration patterns:
+
+- **Location:** `.claude/agents/workflow-coordinator.md`
+- **Purpose:** Analyze requests → decompose into tasks → route to specialized agents → synthesize results
+- **Key Feature:** Applies mental models via `think-first` skill for significant decisions
+
+Agents use the Task tool to delegate work. They don't do specialized work themselves — they coordinate others who do.
+
 ## Philosophy
 
 - **Terminal is clarity** — fewer distractions, more focus
