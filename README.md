@@ -44,6 +44,8 @@ A "co-operating system" means your AI doesn't just answer questions — it opera
 - 🧠 **Decision Frameworks** — Apply mental models before big decisions
 - 🏗️ **Project Templates** — Initialize new projects with proper structure
 - 📖 **Retrospectives** — Learn from wins and failures systematically
+- 🔍 **Vault Analysis** — Detect patterns in daily notes, recommend automations
+- 🎨 **Aesthetic Definition** — Define brand color palettes and visual styles for image creation
 
 ## How the Four Pillars Work Together
 
@@ -1037,6 +1039,26 @@ The starter kit includes a `workflow-coordinator` agent that demonstrates multi-
 - **Location:** `.claude/agents/workflow-coordinator.md`
 - **Purpose:** Analyze requests → decompose into tasks → route to specialized agents → synthesize results
 - **Key Feature:** Applies mental models via `think-first` skill for significant decisions
+
+**Example: Vault Analyst**
+
+The starter kit also includes a `vault-analyst` agent that analyzes your daily notes to surface patterns and automation opportunities:
+
+- **Location:** `.claude/agents/vault-analyst.md`
+- **Purpose:** Scan daily notes → detect behavioral patterns → recommend skills and agents
+- **Key Feature:** Identifies repetitive tasks and workflows that could be automated
+
+Invoke with: "analyze my vault", "what patterns do you see?", or "suggest automations"
+
+**Example: Aesthetic Definer**
+
+The starter kit also includes an `aesthetic-definer` agent that helps users create their own visual brand identity:
+
+- **Location:** `.claude/agents/aesthetic-definer.md`
+- **Purpose:** Interview user about brand personality → guide color selection → output aesthetic.md
+- **Key Feature:** Generates a ready-to-use aesthetic file compatible with image generation skills
+
+Invoke with: "define my aesthetic", "create brand palette", or "set up my visual style"
 
 Agents use the Task tool to delegate work. They don't do specialized work themselves — they coordinate others who do.
 
