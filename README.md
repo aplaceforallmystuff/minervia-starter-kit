@@ -108,27 +108,9 @@ Most people start manual and add automation as trust builds.
 
 ### How They Connect
 
-```
-┌─────────────────────────────────────────────┐
-│  YOU (in terminal)                          │
-│  "Show me what I worked on yesterday"       │
-└──────────────────┬──────────────────────────┘
-                   │
-                   ▼
-         ┌─────────────────┐
-         │  Claude Code    │
-         │  (reasoning)    │
-         └────┬──────┬─────┘
-              │      │
-     ┌────────┘      └────────┐
-     │                        │
-     ▼                        ▼
-┌──────────┐          ┌────────────────┐
-│ Obsidian │          │  MCP Servers   │
-│  vault   │          │  (calendar,    │
-│ (memory) │          │   email, etc)  │
-└──────────┘          └────────────────┘
-```
+<p align="center">
+  <img src="docs/images/architecture-flow.svg" alt="Minervia Architecture" width="600">
+</p>
 
 Claude reads your vault, pulls from MCP servers, reasons about it all, and gives you one coherent answer.
 
@@ -416,6 +398,10 @@ Minervia is designed around principles that make productivity systems actually w
 These aren't arbitrary choices. Systems fail when they require too many decisions at the wrong moments. Minervia pushes those decisions to Claude while keeping you in control.
 
 ## When to Use Each Skill
+
+<p align="center">
+  <img src="docs/images/skills-overview.svg" alt="Minervia Skills Overview" width="750">
+</p>
 
 Skills install to `~/.claude/skills/` and work in any vault. Here's when and how to use them:
 

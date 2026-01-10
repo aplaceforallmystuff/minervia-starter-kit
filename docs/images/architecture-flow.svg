@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" font-family="system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#8b5cf6"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L9,3 z" fill="#6366f1"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="600" height="400" fill="#fafafa"/>
+
+  <!-- User/Terminal Box -->
+  <g transform="translate(200, 20)">
+    <rect x="0" y="0" width="200" height="70" rx="8" fill="#ffffff" stroke="#e5e5e5" stroke-width="2"/>
+    <rect x="0" y="0" width="200" height="6" rx="3" fill="url(#accent)"/>
+    <text x="100" y="35" text-anchor="middle" font-size="20">⌨️</text>
+    <text x="100" y="55" text-anchor="middle" font-size="14" font-weight="600" fill="#1f2937">You (Terminal)</text>
+  </g>
+
+  <!-- Arrow: User → Claude Code -->
+  <path d="M 300 95 L 300 130" stroke="#6366f1" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="315" y="115" font-size="11" fill="#6b7280">prompt</text>
+
+  <!-- Claude Code Box (central, emphasized) -->
+  <g transform="translate(175, 140)">
+    <rect x="0" y="0" width="250" height="80" rx="10" fill="#ffffff" stroke="#6366f1" stroke-width="3"/>
+    <rect x="0" y="0" width="250" height="8" rx="4" fill="url(#accent)"/>
+    <text x="125" y="40" text-anchor="middle" font-size="22">🧠</text>
+    <text x="125" y="62" text-anchor="middle" font-size="16" font-weight="600" fill="#1f2937">Claude Code</text>
+  </g>
+
+  <!-- Split arrows from Claude Code -->
+  <path d="M 250 225 L 150 280" stroke="#6366f1" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 350 225 L 450 280" stroke="#6366f1" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="185" y="255" font-size="11" fill="#6b7280">reads</text>
+  <text x="390" y="255" font-size="11" fill="#6b7280">queries</text>
+
+  <!-- Obsidian Box -->
+  <g transform="translate(50, 290)">
+    <rect x="0" y="0" width="180" height="80" rx="8" fill="#ffffff" stroke="#e5e5e5" stroke-width="2"/>
+    <rect x="0" y="0" width="180" height="6" rx="3" fill="url(#accent)"/>
+    <text x="90" y="38" text-anchor="middle" font-size="20">📁</text>
+    <text x="90" y="58" text-anchor="middle" font-size="14" font-weight="600" fill="#1f2937">Obsidian Vault</text>
+    <text x="90" y="72" text-anchor="middle" font-size="11" fill="#6b7280">memory &amp; context</text>
+  </g>
+
+  <!-- MCP Servers Box -->
+  <g transform="translate(370, 290)">
+    <rect x="0" y="0" width="180" height="80" rx="8" fill="#ffffff" stroke="#e5e5e5" stroke-width="2"/>
+    <rect x="0" y="0" width="180" height="6" rx="3" fill="url(#accent)"/>
+    <text x="90" y="38" text-anchor="middle" font-size="20">🔌</text>
+    <text x="90" y="58" text-anchor="middle" font-size="14" font-weight="600" fill="#1f2937">MCP Servers</text>
+    <text x="90" y="72" text-anchor="middle" font-size="11" fill="#6b7280">calendar, email, etc</text>
+  </g>
+
+  <!-- Return arrows (dotted) -->
+  <path d="M 140 285 L 240 225" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <path d="M 460 285 L 360 225" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+  <!-- Legend -->
+  <text x="300" y="395" text-anchor="middle" font-size="11" fill="#9ca3af">Context flows in, coherent answers flow out</text>
+</svg>
