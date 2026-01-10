@@ -397,6 +397,24 @@ Here's what makes this different from standard AI chat interfaces — context th
 
 The more you use it, the smarter it gets — not because Claude learns, but because your vault grows richer with context.
 
+## Engineering Principles
+
+Minervia is designed around principles that make productivity systems actually work:
+
+| Principle | How Minervia Applies It |
+|-----------|------------------------|
+| **One reliable behavior** | Capture everything, let skills do the organizing |
+| **Separate memory/compute/interface** | Vault (memory), Claude (compute), CLI (interface) |
+| **Build trust mechanisms** | Skills log what they do; you can see what changed |
+| **Default to safe behavior** | Ask when uncertain, don't guess |
+| **Small, frequent outputs** | Daily notes, project logs, not giant reports |
+| **Next action, not intention** | Projects track executable next actions |
+| **Route, don't organize** | Inbox-triage classifies; you confirm |
+| **Design for restart** | Miss a week? Just restart. No cleanup required |
+| **Core loop, then modules** | Start with 6 skills, add more as needed |
+
+These aren't arbitrary choices. Systems fail when they require too many decisions at the wrong moments. Minervia pushes those decisions to Claude while keeping you in control.
+
 ## When to Use Each Skill
 
 Skills install to `~/.claude/skills/` and work in any vault. Here's when and how to use them:
