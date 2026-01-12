@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-01-12
+
+### Added
+
+- **vault-stats** skill - Quick visibility into vault health: note counts by PARA location, recent activity, inbox status, daily note streaks
+- First-run welcome experience via SessionStart hook - New users see a helpful onboarding guide on their first Claude session
+- `.minervia-initialized` marker file to track setup completion
+
+### Changed
+
+- **weekly-review** skill enhanced with:
+  - Energy Audit section - track what energized vs drained you during the week
+  - Connections Discovered section - document unexpected links between notes
+  - New `energy only` parameter to run just the energy audit
+  - Updated workflow from 4 steps to 5 steps
+
+### Improved
+
+- Install script now creates `.claude/settings.json` with welcome hook for first-time users
+- Better onboarding experience for new Minervia users
+
 ## [1.0.0] - 2026-01-02
 
 ### Added

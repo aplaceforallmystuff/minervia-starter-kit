@@ -91,7 +91,46 @@ Move to appropriate location based on vault structure.
 
 Record what was moved where.
 
-## Part B: Daily Notes Cleanup
+## Part B: Energy Audit
+
+### Why This Matters
+
+Weekly reviews often focus on *what* got done but miss *how it felt*. Tracking energy patterns reveals:
+- Which types of work energize you
+- What consistently drains you
+- Patterns you can adjust
+
+### Process
+
+**Step 1: Scan the week's notes**
+
+Look for signals in daily notes:
+- Mentions of feeling good/bad about work
+- Tasks that took longer than expected
+- Work that flowed easily
+- Resistance or procrastination patterns
+
+**Step 2: Categorize energy impact**
+
+| Gave Energy | Drained Energy |
+|-------------|----------------|
+| [List items] | [List items] |
+
+**Step 3: Identify connections discovered**
+
+During the week, what unexpected links emerged?
+- Notes that should reference each other
+- Concepts that connect across projects
+- Patterns across different work streams
+
+**Step 4: Determine adjustments**
+
+Based on energy patterns:
+- What to do more of
+- What to delegate/automate/eliminate
+- Schedule changes to match energy
+
+## Part C: Daily Notes Cleanup
 
 ### Process
 
@@ -173,6 +212,25 @@ Apply all? (Y/n/review each)
 |------|-------------|------|
 | [Name] | [Location] | [tags] |
 
+### Energy Audit
+
+**Gave Energy:**
+- [Item that energized]
+- [Item that energized]
+
+**Drained Energy:**
+- [Item that drained]
+- [Item that drained]
+
+**Adjustments:**
+- [What to change]
+
+### Connections Discovered
+
+| Note A | ←→ | Note B | Why Significant |
+|--------|-----|--------|-----------------|
+| [[Note]] | | [[Note]] | [Reason] |
+
 ### Daily Notes Cleanup
 
 **Notes Scanned:** X
@@ -187,6 +245,7 @@ Apply all? (Y/n/review each)
 - Total files touched: X
 - Links added: X
 - Frontmatter fixes: X
+- Energy patterns identified: X
 ```
 
 ## Workflow
@@ -202,14 +261,20 @@ Apply all? (Y/n/review each)
    ├── Get confirmation
    └── Execute moves
 
-3. Clean Daily Notes
+3. Energy Audit
+   ├── Scan week's daily notes
+   ├── Identify energy patterns
+   ├── Note connections discovered
+   └── Propose adjustments
+
+4. Clean Daily Notes
    ├── List recent notes
    ├── Check frontmatter
    ├── Find link opportunities
    ├── Get confirmation
    └── Execute fixes
 
-4. Complete
+5. Complete
    ├── Generate summary
    └── Log to daily note
 ```
@@ -217,14 +282,17 @@ Apply all? (Y/n/review each)
 ## Parameters
 
 Optional modifiers:
-- `inbox only` - Skip daily notes cleanup
+- `inbox only` - Skip daily notes cleanup and energy audit
 - `daily notes only` - Skip inbox processing
+- `energy only` - Just run energy audit
 - `dry run` - Preview without applying
 - `this month` - Extend daily notes range
 
 ## Success Criteria
 
 - [ ] All inbox items processed or explicitly deferred
+- [ ] Energy patterns identified and adjustments proposed
+- [ ] Connections discovered documented
 - [ ] Recent daily notes have valid frontmatter
 - [ ] Links added where appropriate
 - [ ] Summary logged to daily note

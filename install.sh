@@ -183,6 +183,40 @@ if [ ! -d ".git" ] && command -v git &> /dev/null; then
     fi
 fi
 
+# Create FIRST_RUN marker for welcome message
+if [ ! -f ".minervia-initialized" ]; then
+    touch ".minervia-initialized"
+    FIRST_RUN=true
+else
+    FIRST_RUN=false
+fi
+
+# Create .claude directory if needed
+mkdir -p ".claude"
+
+# Add welcome hook for first-time users (only if .claude/settings.json doesn't exist)
+if [ ! -f ".claude/settings.json" ]; then
+    cat > ".claude/settings.json" << 'SETTINGS'
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -f .minervia-first-run ] && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"\\n🦉 Welcome to Minervia!\\n\\nThis vault is configured for human-led knowledge work with AI assistance.\\n\\n**Quick Start:**\\n- Describe what you are working on\\n- Use /log-to-daily before ending your session\\n- Run /weekly-review to maintain vault health\\n\\n**Available Skills:** /log-to-daily, /log-to-project, /start-project, /weekly-review, /think-first, /lessons-learned, /vault-stats\\n\\nEdit CLAUDE.md to customize your vault configuration.\\n\"}}' && rm .minervia-first-run || true"
+          }
+        ]
+      }
+    ]
+  }
+}
+SETTINGS
+    # Create the first-run marker that gets removed after first session
+    touch ".minervia-first-run"
+    echo -e "${GREEN}✓${NC} First-run welcome configured"
+fi
+
 echo ""
 echo "======================================="
 echo -e "${GREEN}Setup Complete!${NC}"
@@ -196,5 +230,9 @@ echo "3. Try: /log-to-daily after your first session"
 echo ""
 echo "Skills installed to: $SKILLS_TARGET"
 echo ""
-echo "Learn more at: https://minervia.co"
+if [ "$FIRST_RUN" = true ]; then
+    echo -e "${GREEN}Tip:${NC} Your first Claude session will show a welcome guide!"
+    echo ""
+fi
+echo "Learn more at: https://github.com/aplaceforallmystuff/minervia-starter-kit"
 echo ""
