@@ -6,6 +6,8 @@
 
 A co-operating system for human-led knowledge work. Terminal-native AI that treats your Obsidian vault as persistent memory.
 
+![Architecture](docs/images/architecture-diagram.png)
+
 **You lead. AI assists. Your vault remembers.**
 
 ## What Is Minervia?
