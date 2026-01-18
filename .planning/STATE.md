@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-18)
 
 **Core value:** After running installer, Claude understands your vault and you're immediately productive
-**Current focus:** Phase 5 - Folder Scaffolding
+**Current focus:** Phase 5 Complete - Ready for Phase 6
 
 ## Current Position
 
 Phase: 5 of 8 (Vault Scaffolding)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-01-18 - Completed 05-01-PLAN.md
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-01-18 - Completed 05-02-PLAN.md
 
-Progress: [██████░░░░] 53%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
+- Total plans completed: 9
 - Average duration: 2.7 min
-- Total execution time: 22 min
+- Total execution time: 24 min
 
 **By Phase:**
 
@@ -31,11 +31,11 @@ Progress: [██████░░░░] 53%
 | 02-cli-interface | 2 | 5 min | 2.5 min |
 | 03-questionnaire-engine | 2 | 6 min | 3 min |
 | 04-claudemd-generation | 2 | 6 min | 3 min |
-| 05-vault-scaffolding | 1 | 3 min | 3 min |
+| 05-vault-scaffolding | 2 | 5 min | 2.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-01 (3 min), 03-02 (3 min), 04-01 (3 min), 04-02 (3 min), 05-01 (3 min)
-- Trend: Consistent 3 min per plan
+- Last 5 plans: 03-02 (3 min), 04-01 (3 min), 04-02 (3 min), 05-01 (3 min), 05-02 (2 min)
+- Trend: Consistent 2-3 min per plan
 
 *Updated after each plan completion*
 
@@ -76,6 +76,9 @@ Recent decisions affecting current work:
 - [05-01]: Templates use Obsidian core syntax ({{date:...}}, {{title}}) for compatibility
 - [05-01]: PARA folders include current year subfolder in 00 Daily
 - [05-01]: Templates folder nested under 04 Resources for organization
+- [05-02]: Example notes include wiki links to demonstrate Obsidian linking
+- [05-02]: scaffold_new_vault() gates all operations on IS_NEW_VAULT
+- [05-02]: User sees Templates folder configuration tip after scaffolding
 
 ### Pending Todos
 
@@ -88,5 +91,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 05-01-PLAN.md
+Stopped at: Completed 05-02-PLAN.md (Phase 5 complete)
 Resume file: None
