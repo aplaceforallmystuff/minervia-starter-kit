@@ -47,10 +47,11 @@ Plans:
   3. Installer checks for Claude Code CLI and fails with clear instructions if missing
   4. Installer checks Bash version and write permissions before proceeding
   5. Help output documents uninstall process
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: TBD
+- [ ] 02-01-PLAN.md — Add VERSION constant, --help and --version flags with argument parsing
+- [ ] 02-02-PLAN.md — Refactor prerequisite checks (Bash version, Claude CLI, write permissions)
 
 ### Phase 3: Questionnaire Engine
 **Goal**: Installer captures user context through interactive prompts
@@ -146,7 +147,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 1/1 | Complete | 2026-01-18 |
-| 2. CLI Interface | 0/? | Not started | - |
+| 2. CLI Interface | 0/2 | Not started | - |
 | 3. Questionnaire Engine | 0/? | Not started | - |
 | 4. CLAUDE.md Generation | 0/? | Not started | - |
 | 5. Vault Scaffolding | 0/? | Not started | - |
