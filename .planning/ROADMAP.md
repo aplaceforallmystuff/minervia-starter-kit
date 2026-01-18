@@ -110,8 +110,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — State tracking functions, inbox-process skill, pkm-assistant agent
-- [ ] 06-02-PLAN.md — Refactor installation with conflict handling and state tracking
+- [x] 06-01-PLAN.md — State tracking functions, inbox-process skill, pkm-assistant agent
+- [x] 06-02-PLAN.md — Refactor installation with conflict handling and state tracking
 
 ### Phase 7: Idempotency and Safety
 **Goal**: Installer is safe to re-run and never destroys user content without confirmation
@@ -155,7 +155,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 3. Questionnaire Engine | 2/2 | Complete | 2026-01-18 |
 | 4. CLAUDE.md Generation | 2/2 | Complete | 2026-01-18 |
 | 5. Vault Scaffolding | 2/2 | Complete | 2026-01-18 |
-| 6. Skills Installation | 0/2 | Not started | - |
+| 6. Skills Installation | 2/2 | Complete | 2026-01-18 |
 | 7. Idempotency and Safety | 0/? | Not started | - |
 | 8. Update System | 0/? | Not started | - |
 

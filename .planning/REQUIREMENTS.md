@@ -114,10 +114,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | VAULT-02 | Phase 5 | Complete |
 | VAULT-03 | Phase 5 | Complete |
 | VAULT-04 | Phase 5 | Complete |
-| SKIL-01 | Phase 6 | Pending |
-| SKIL-02 | Phase 6 | Pending |
-| SKIL-03 | Phase 6 | Pending |
-| SKIL-04 | Phase 6 | Pending |
+| SKIL-01 | Phase 6 | Complete |
+| SKIL-02 | Phase 6 | Complete |
+| SKIL-03 | Phase 6 | Complete |
+| SKIL-04 | Phase 6 | Complete |
 | UPDT-01 | Phase 8 | Pending |
 | UPDT-02 | Phase 8 | Pending |
 | UPDT-03 | Phase 8 | Pending |
