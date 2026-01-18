@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 8 of 8 (Update System)
-Plan: 0 of ? in current phase
-Status: Ready to plan
-Last activity: 2026-01-18 - Phase 7 verified complete
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-01-18 - Completed 08-01-PLAN.md
 
-Progress: [█████████░] 88%
+Progress: [█████████▒] 93%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
-- Average duration: 2.8 min
-- Total execution time: 37 min
+- Total plans completed: 14
+- Average duration: 3.6 min
+- Total execution time: 50 min
 
 **By Phase:**
 
@@ -34,10 +34,11 @@ Progress: [█████████░] 88%
 | 05-vault-scaffolding | 2 | 5 min | 2.5 min |
 | 06-skills-installation | 2 | 5 min | 2.5 min |
 | 07-idempotency-and-safety | 2 | 8 min | 4 min |
+| 08-update-system | 1 | 13 min | 13 min |
 
 **Recent Trend:**
-- Last 5 plans: 05-02 (2 min), 06-01 (3 min), 06-02 (2 min), 07-01 (4 min), 07-02 (4 min)
-- Trend: Consistent 2-4 min per plan
+- Last 5 plans: 06-01 (3 min), 06-02 (2 min), 07-01 (4 min), 07-02 (4 min), 08-01 (13 min)
+- Trend: 08-01 took longer due to network testing and cross-platform debugging
 
 *Updated after each plan completion*
 
@@ -97,6 +98,10 @@ Recent decisions affecting current work:
 - [07-02]: Questionnaire answers saved as questionnaire_answers object in state.json
 - [07-02]: Early init_state_file call enables saved answers before questionnaire
 - [07-02]: show_final_summary adapts output based on FIRST_RUN flag
+- [08-01]: Standalone minervia-update.sh script for cleaner separation from install.sh
+- [08-01]: Cross-platform sort -V detection via functional test, not GNU check
+- [08-01]: Backups preserve relative path structure from state.json manifest
+- [08-01]: Path resolution: skills/agents to ~/.claude/, others use vault_path from state
 
 ### Pending Todos
 
@@ -105,9 +110,10 @@ None yet.
 ### Blockers/Concerns
 
 - macOS default Bash is 3.2.57; users need Homebrew Bash 4.0+ for full functionality
+- Remote repo (GitHub) has older install.sh without VERSION - will need push for version comparison to work
 
 ## Session Continuity
 
-Last session: 2026-01-18
-Stopped at: Phase 7 verified complete, ready for Phase 8 planning
+Last session: 2026-01-18T22:33:29Z
+Stopped at: Completed 08-01-PLAN.md
 Resume file: None
