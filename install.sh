@@ -14,6 +14,47 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
+# Version - single source of truth
+readonly VERSION="1.0.0"
+
+# Display help message
+show_help() {
+    cat << 'EOF'
+Usage: install.sh [OPTIONS]
+
+Minervia installer - sets up your Obsidian vault for AI-assisted knowledge work.
+
+Options:
+  -h, --help      Show this help message and exit
+  -V, --version   Show version number and exit
+
+Examples:
+  ./install.sh              Run the installer
+  ./install.sh --help       Show this help
+
+Prerequisites:
+  - Claude Code CLI (https://claude.ai/download)
+  - Bash 4.0 or later
+  - Write permissions to current directory
+
+Uninstall:
+  To remove Minervia from your system:
+  1. Delete skill directories: rm -rf ~/.claude/skills/minervia-*
+  2. Optionally remove vault files:
+     - CLAUDE.md (contains your customizations)
+     - .minervia-initialized
+     - .minervia-first-run
+     - .claude/settings.json (if you want to remove hooks)
+
+More info: https://github.com/aplaceforallmystuff/minervia-starter-kit
+EOF
+}
+
+# Display version
+show_version() {
+    echo "minervia-installer $VERSION"
+}
+
 # Track temporary files for cleanup
 TEMP_FILES=()
 
