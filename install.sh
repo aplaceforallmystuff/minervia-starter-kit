@@ -682,20 +682,48 @@ check_optional_command() {
 # Main Installation
 # ============================================================================
 
-echo "Minervia Setup"
-echo "=============="
-echo ""
-
 check_prerequisites
 
 # Initialize ANSWERS array (after Bash 4.0+ verified by check_prerequisites)
 declare -A ANSWERS
 
+# Copy CLI flags to ANSWERS array (for non-interactive mode)
+[[ -n "${CLI_NAME:-}" ]] && ANSWERS[name]="$CLI_NAME"
+[[ -n "${CLI_VAULT_PATH:-}" ]] && ANSWERS[vault_path]="$CLI_VAULT_PATH"
+[[ -n "${CLI_ROLE:-}" ]] && ANSWERS[role]="$CLI_ROLE"
+[[ -n "${CLI_AREAS:-}" ]] && ANSWERS[areas]="$CLI_AREAS"
+[[ -n "${CLI_PREFERENCES:-}" ]] && ANSWERS[preferences]="$CLI_PREFERENCES"
+
 echo -e "${GREEN}✓${NC} Prerequisites validated"
 echo ""
 
-# Detect the vault directory (where install.sh was run from)
-VAULT_DIR="$(pwd)"
+# Gum detection and install offer
+offer_gum_install
+
+# Run questionnaire (interactive or skip if flags provided)
+if [[ "${SKIP_QUESTIONNAIRE:-false}" == "true" ]]; then
+    echo "Skipping questionnaire (--no-questionnaire)"
+    # Validate required fields
+    if [[ -z "${ANSWERS[name]:-}" ]] || [[ -z "${ANSWERS[vault_path]:-}" ]]; then
+        error_exit "Non-interactive mode requires --name and --vault-path" \
+            "Run with: ./install.sh --name \"Your Name\" --vault-path \"/path/to/vault\""
+    fi
+elif ! is_interactive; then
+    echo "Non-interactive mode detected."
+    if [[ -z "${ANSWERS[name]:-}" ]] || [[ -z "${ANSWERS[vault_path]:-}" ]]; then
+        error_exit "Non-interactive mode requires --name and --vault-path" \
+            "Run with: ./install.sh --name \"Your Name\" --vault-path \"/path/to/vault\""
+    fi
+else
+    run_questionnaire
+fi
+
+echo ""
+echo "Installing Minervia..."
+echo ""
+
+# Use vault path from questionnaire, or fall back to current directory
+VAULT_DIR="${ANSWERS[vault_path]:-$(pwd)}"
 SKILLS_SOURCE="$(dirname "$0")/skills"
 
 # Validate write permissions to vault directory
@@ -706,13 +734,15 @@ if [[ ! -d "$SKILLS_SOURCE" ]]; then
     error_exit "Skills directory not found: $SKILLS_SOURCE" "Ensure you are running install.sh from the minervia-starter-kit directory"
 fi
 
+# Change to vault directory for installation operations
+cd "$VAULT_DIR" || error_exit "Cannot access vault directory: $VAULT_DIR"
+
 # Check if this is an Obsidian vault
 if [ -d ".obsidian" ]; then
     echo -e "${GREEN}✓${NC} Obsidian vault detected"
 else
-    echo -e "${YELLOW}!${NC} No .obsidian folder found"
-    echo "   Run this script from your Obsidian vault root"
-    echo "   Or open this folder in Obsidian first"
+    echo -e "${YELLOW}!${NC} No .obsidian folder found in ${VAULT_DIR}"
+    echo "   Open this folder in Obsidian first to initialize it as a vault"
     echo ""
 fi
 
