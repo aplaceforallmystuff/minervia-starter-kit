@@ -549,6 +549,8 @@ TEMP_FILES=()
 # Cleanup function - runs on exit (success or failure)
 cleanup() {
     local exit_code=$?
+    # Release lock file first
+    release_lock 2>/dev/null || true
     # Remove any temporary files created during installation
     for temp_file in "${TEMP_FILES[@]:-}"; do
         if [[ -f "$temp_file" ]]; then
@@ -653,6 +655,53 @@ EOF
 
         mv "$temp_file" "$MINERVIA_STATE_FILE"
     fi
+}
+
+# Validate state file structure
+# Args: file_path
+# Returns: 0 if valid, 1 if invalid
+validate_state_file() {
+    local file="$1"
+
+    # Check file exists and has content
+    [[ ! -s "$file" ]] && return 1
+
+    # Check for required fields
+    grep -q '"version"' "$file" || return 1
+    grep -q '"files"' "$file" || return 1
+
+    # Basic JSON validation: count braces, should be equal
+    local open_braces close_braces
+    open_braces=$(grep -o '{' "$file" | wc -l | tr -d ' ')
+    close_braces=$(grep -o '}' "$file" | wc -l | tr -d ' ')
+    [[ "$open_braces" -eq "$close_braces" ]] || return 1
+
+    return 0
+}
+
+# Acquire lock to prevent concurrent installer runs
+# Exits with error if another installer is running
+acquire_lock() {
+    # Create state dir if needed for lock file
+    mkdir -p "$MINERVIA_STATE_DIR" 2>/dev/null || true
+
+    if [[ -f "$LOCK_FILE" ]]; then
+        local pid
+        pid=$(cat "$LOCK_FILE" 2>/dev/null)
+        if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+            error_exit "Another installer is running (PID $pid)" \
+                "Wait for it to complete or remove $LOCK_FILE"
+        fi
+        # Stale lock file (process not running), remove it
+        rm -f "$LOCK_FILE"
+    fi
+    # Write current PID to lock file
+    echo $$ > "$LOCK_FILE"
+}
+
+# Release lock file
+release_lock() {
+    [[ -f "$LOCK_FILE" ]] && rm -f "$LOCK_FILE"
 }
 
 # Record an installed file in state.json manifest
@@ -1505,6 +1554,9 @@ check_optional_command() {
 
 check_prerequisites
 
+# Acquire lock to prevent concurrent installer runs
+acquire_lock
+
 # Initialize ANSWERS array (after Bash 4.0+ verified by check_prerequisites)
 declare -A ANSWERS
 
@@ -1578,6 +1630,13 @@ fi
 # Initialize state tracking before any installation
 echo "Initializing state tracking..."
 init_state_file
+
+# Validate state file and recover if corrupted
+if ! validate_state_file "$MINERVIA_STATE_FILE"; then
+    echo -e "${YELLOW}!${NC} State file corrupted, recreating..."
+    mv "$MINERVIA_STATE_FILE" "${MINERVIA_STATE_FILE}.corrupted-$(date +%Y%m%d)"
+    init_state_file
+fi
 echo -e "${GREEN}✓${NC} State tracking initialized (~/.minervia/state.json)"
 
 # Install skills and agents to user's Claude Code directory
