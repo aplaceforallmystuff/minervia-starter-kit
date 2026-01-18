@@ -92,10 +92,11 @@ Plans:
   2. Templates exist for daily notes, projects, and areas with proper YAML frontmatter
   3. Example notes demonstrate how to use each PARA section
   4. For existing vaults, no folders or files are created (structure preserved)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: TBD
+- [ ] 05-01-PLAN.md — PARA folder creation and Obsidian template files
+- [ ] 05-02-PLAN.md — Example notes and scaffold_new_vault integration
 
 ### Phase 6: Skills Installation
 **Goal**: Skills and agents are installed globally with version tracking
@@ -152,7 +153,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 2. CLI Interface | 2/2 | Complete | 2026-01-18 |
 | 3. Questionnaire Engine | 2/2 | Complete | 2026-01-18 |
 | 4. CLAUDE.md Generation | 2/2 | Complete | 2026-01-18 |
-| 5. Vault Scaffolding | 0/? | Not started | - |
+| 5. Vault Scaffolding | 0/2 | Not started | - |
 | 6. Skills Installation | 0/? | Not started | - |
 | 7. Idempotency and Safety | 0/? | Not started | - |
 | 8. Update System | 0/? | Not started | - |
