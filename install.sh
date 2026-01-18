@@ -64,6 +64,158 @@ offer_gum_install() {
     fi
 }
 
+# ============================================================================
+# Input Functions (Dual-Mode: Gum with read fallback)
+# ============================================================================
+
+MAX_RETRIES=3
+
+# ask_text - Single-line text input with optional validation
+# Usage: result=$(ask_text "Prompt:" "placeholder" required)
+# Args: prompt, placeholder, required (true/false)
+ask_text() {
+    local prompt="$1"
+    local placeholder="${2:-}"
+    local required="${3:-false}"
+    local result=""
+    local retries=0
+
+    while true; do
+        if $HAS_GUM; then
+            result=$(gum input --placeholder "$placeholder" --prompt "$prompt ")
+        else
+            read -p "$prompt " result
+        fi
+
+        # Validation for required fields
+        if [[ "$required" == "true" && -z "$result" ]]; then
+            ((retries++))
+            if [[ $retries -ge $MAX_RETRIES ]]; then
+                echo -e "${RED}Maximum retries exceeded.${NC}" >&2
+                return 1
+            fi
+            echo -e "${RED}This field is required.${NC} ($((MAX_RETRIES - retries)) attempts remaining)" >&2
+            continue
+        fi
+
+        break
+    done
+
+    echo "$result"
+}
+
+# ask_choice - Single selection from options
+# Usage: result=$(ask_choice "Prompt:" "Option A" "Option B" "Option C")
+# Returns: Selected option text
+ask_choice() {
+    local prompt="$1"
+    shift
+    local options=("$@")
+    local result=""
+
+    if $HAS_GUM; then
+        result=$(gum choose --header "$prompt" "${options[@]}")
+    else
+        echo "$prompt"
+        local i=1
+        for opt in "${options[@]}"; do
+            echo "  $i) $opt"
+            ((i++))
+        done
+
+        while true; do
+            read -p "Enter number (1-${#options[@]}): " choice
+            if [[ "$choice" =~ ^[0-9]+$ ]] && [[ $choice -ge 1 ]] && [[ $choice -le ${#options[@]} ]]; then
+                result="${options[$((choice-1))]}"
+                break
+            fi
+            echo -e "${RED}Invalid selection. Enter a number 1-${#options[@]}.${NC}"
+        done
+    fi
+
+    echo "$result"
+}
+
+# ask_multi - Multi-select from options (Tab to select with Gum)
+# Usage: result=$(ask_multi "Prompt:" "Opt A" "Opt B" "Opt C")
+# Returns: Newline-separated selected options (convert to comma in caller if needed)
+ask_multi() {
+    local prompt="$1"
+    shift
+    local options=("$@")
+    local result=""
+
+    if $HAS_GUM; then
+        # Tab to select, Enter to confirm
+        result=$(printf '%s\n' "${options[@]}" | gum filter --no-limit --header "$prompt (Tab to select, Enter to confirm)")
+    else
+        echo "$prompt"
+        echo "(Enter comma-separated numbers, e.g., 1,3,4. Press Enter for none.)"
+        local i=1
+        for opt in "${options[@]}"; do
+            echo "  $i) $opt"
+            ((i++))
+        done
+
+        while true; do
+            read -p "Select: " choices
+            if [[ -z "$choices" ]]; then
+                break  # Allow empty selection
+            fi
+
+            # Parse comma-separated numbers
+            local selected=()
+            IFS=',' read -ra nums <<< "$choices"
+            local valid=true
+
+            for num in "${nums[@]}"; do
+                num=$(echo "$num" | tr -d ' ')  # Trim whitespace
+                if [[ "$num" =~ ^[0-9]+$ ]] && [[ $num -ge 1 ]] && [[ $num -le ${#options[@]} ]]; then
+                    selected+=("${options[$((num-1))]}")
+                else
+                    valid=false
+                    break
+                fi
+            done
+
+            if $valid; then
+                result=$(printf '%s\n' "${selected[@]}")
+                break
+            fi
+            echo -e "${RED}Invalid selection. Use numbers 1-${#options[@]}, comma-separated.${NC}"
+        done
+    fi
+
+    echo "$result"
+}
+
+# ask_confirm - Yes/No confirmation
+# Usage: if ask_confirm "Continue?" "y"; then ... fi
+# Args: prompt, default (y/n)
+# Returns: Exit code 0 for yes, 1 for no
+ask_confirm() {
+    local prompt="$1"
+    local default="${2:-n}"  # n or y
+
+    if $HAS_GUM; then
+        if [[ "$default" == "y" ]]; then
+            gum confirm --default=yes "$prompt"
+        else
+            gum confirm "$prompt"
+        fi
+        return $?
+    else
+        local yn_prompt="(y/N)"
+        [[ "$default" == "y" ]] && yn_prompt="(Y/n)"
+
+        read -p "$prompt $yn_prompt " response
+        response=${response:-$default}
+
+        [[ "$response" =~ ^[Yy] ]]
+        return $?
+    fi
+}
+
 # Display help message
 show_help() {
     cat << 'EOF'
