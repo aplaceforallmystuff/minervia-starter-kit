@@ -216,6 +216,101 @@ ask_confirm() {
     fi
 }
 
+# ============================================================================
+# Questionnaire Flow
+# ============================================================================
+
+# Options for choice questions
+ROLE_OPTIONS=("Developer" "Designer" "Product Manager" "Consultant" "Writer" "Researcher" "Other")
+AREA_OPTIONS=("Software Development" "Content Creation" "Research" "Consulting" "Project Management" "Learning" "Personal")
+PREF_OPTIONS=("Concise responses" "Detailed explanations" "Step-by-step guidance" "Direct communication" "Socratic questioning")
+
+# Progress tracking
+CURRENT_QUESTION=0
+TOTAL_QUESTIONS=5
+
+# Show progress indicator
+show_progress() {
+    ((CURRENT_QUESTION++))
+    echo ""
+    if $HAS_GUM; then
+        gum style --foreground 99 "Question $CURRENT_QUESTION of $TOTAL_QUESTIONS"
+    else
+        echo -e "${YELLOW}--- Question $CURRENT_QUESTION of $TOTAL_QUESTIONS ---${NC}"
+    fi
+}
+
+# Run the interactive questionnaire
+run_questionnaire() {
+    CURRENT_QUESTION=0
+
+    echo ""
+    if $HAS_GUM; then
+        gum style --bold "Let's personalize your Minervia installation"
+    else
+        echo "Let's personalize your Minervia installation"
+    fi
+    echo ""
+
+    # Question 1: Name
+    show_progress
+    echo "What should Claude call you?"
+    ANSWERS[name]=$(ask_text "Your name:" "e.g., Jane" true)
+
+    # Question 2: Vault Path
+    show_progress
+    echo "Where is your Obsidian vault?"
+    echo "(Enter the full path to your vault folder)"
+    while true; do
+        ANSWERS[vault_path]=$(ask_text "Vault path:" "e.g., /Users/jane/Documents/MyVault" true)
+
+        if [[ -d "${ANSWERS[vault_path]}" ]]; then
+            break
+        else
+            if ask_confirm "Directory doesn't exist. Create it?" "n"; then
+                if mkdir -p "${ANSWERS[vault_path]}" 2>/dev/null; then
+                    echo -e "${GREEN}✓${NC} Created ${ANSWERS[vault_path]}"
+                    break
+                else
+                    echo -e "${RED}Failed to create directory.${NC} Check permissions."
+                fi
+            fi
+        fi
+    done
+
+    # Question 3: Role
+    show_progress
+    echo "What best describes your role?"
+    ANSWERS[role]=$(ask_choice "Select your role:" "${ROLE_OPTIONS[@]}")
+
+    # Conditional: If "Other", ask for custom role
+    if [[ "${ANSWERS[role]}" == "Other" ]]; then
+        ANSWERS[role]=$(ask_text "Describe your role:" "e.g., Freelance editor" true)
+    fi
+
+    # Question 4: Key Areas
+    show_progress
+    echo "What areas do you focus on?"
+    echo "(You can select multiple)"
+    local areas_raw
+    areas_raw=$(ask_multi "Select your key areas:" "${AREA_OPTIONS[@]}")
+    ANSWERS[areas]=$(echo "$areas_raw" | tr '\n' ',' | sed 's/,$//')
+
+    # Question 5: Working Preferences
+    show_progress
+    echo "How do you prefer Claude to communicate?"
+    local prefs_raw
+    prefs_raw=$(ask_multi "Select preferences:" "${PREF_OPTIONS[@]}")
+    ANSWERS[preferences]=$(echo "$prefs_raw" | tr '\n' ',' | sed 's/,$//')
+
+    # Summary and confirmation handled by confirm_summary
+    if ! confirm_summary; then
+        # User chose "Start over"
+        run_questionnaire
+        return
+    fi
+}
+
 # Display help message
 show_help() {
     cat << 'EOF'
