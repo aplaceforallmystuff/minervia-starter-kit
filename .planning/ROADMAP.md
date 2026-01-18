@@ -62,10 +62,11 @@ Plans:
   2. Questionnaire captures name, vault location, role/business, key areas, and working preferences
   3. Prompts use Gum if available, fall back to read -p gracefully
   4. User can see progress through questionnaire (e.g., "Question 3 of 5")
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: TBD
+- [ ] 03-01-PLAN.md — Gum detection, ANSWERS array, dual-mode input functions, CLI flags
+- [ ] 03-02-PLAN.md — Questionnaire flow, progress indicator, summary/edit, main integration
 
 ### Phase 4: CLAUDE.md Generation
 **Goal**: Installer generates personalized CLAUDE.md from questionnaire answers
@@ -148,7 +149,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 |-------|----------------|--------|-----------|
 | 1. Foundation | 1/1 | Complete | 2026-01-18 |
 | 2. CLI Interface | 2/2 | Complete | 2026-01-18 |
-| 3. Questionnaire Engine | 0/? | Not started | - |
+| 3. Questionnaire Engine | 0/2 | Planned | - |
 | 4. CLAUDE.md Generation | 0/? | Not started | - |
 | 5. Vault Scaffolding | 0/? | Not started | - |
 | 6. Skills Installation | 0/? | Not started | - |
