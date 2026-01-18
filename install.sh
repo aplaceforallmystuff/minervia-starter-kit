@@ -874,6 +874,33 @@ EXAMPLE
     echo -e "${GREEN}+${NC} Archive example note"
 }
 
+# Orchestrate PARA folder structure creation for new vaults
+# Skips entirely for existing vaults (IS_NEW_VAULT check)
+scaffold_new_vault() {
+    if [[ "$IS_NEW_VAULT" != "true" ]]; then
+        echo -e "${YELLOW}Skipping:${NC} Vault scaffolding (existing vault detected)"
+        return 0
+    fi
+
+    echo ""
+    echo "Creating PARA folder structure..."
+    create_para_folders
+
+    echo ""
+    echo "Creating templates..."
+    create_templates
+
+    echo ""
+    echo "Creating example notes..."
+    create_example_notes
+
+    echo ""
+    echo -e "${GREEN}✓${NC} Vault scaffolding complete"
+    echo ""
+    echo -e "${YELLOW}Tip:${NC} Configure Obsidian to use templates:"
+    echo "     Settings > Core plugins > Templates > Template folder: 04 Resources/Templates"
+}
+
 # Escape special sed characters in user input
 # Prevents sed injection from user-provided values
 escape_for_sed() {
@@ -1152,6 +1179,9 @@ cd "$VAULT_DIR" || error_exit "Cannot access vault directory: $VAULT_DIR"
 
 # Detect vault type (new vs existing)
 detect_vault_type
+
+# Create PARA structure for new vaults
+scaffold_new_vault
 
 # Check if this is an Obsidian vault
 if [ -d ".obsidian" ]; then
