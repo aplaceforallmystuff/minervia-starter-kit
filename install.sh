@@ -430,6 +430,7 @@ Installs skills to ~/.claude/skills/ and agents to ~/.claude/agents/
 Options:
   -h, --help      Show this help message and exit
   -V, --version   Show version number and exit
+  -v, --verbose   Show detailed progress for each step
 
 Non-Interactive Mode:
   For CI/automation, provide answers via flags:
@@ -477,6 +478,35 @@ is_interactive() {
     [ -t 0 ]
 }
 
+# Verbose output helper - only prints if VERBOSE is true
+verbose() {
+    if $VERBOSE; then
+        echo "  $*"
+    fi
+}
+
+# Show status message with color-coded indicator
+# Args: status (ok|skip|fail|info), message
+show_status() {
+    local status="$1"
+    local message="$2"
+
+    case "$status" in
+        ok|success)
+            echo -e "${GREEN}[OK]${NC} $message"
+            ;;
+        skip|skipped)
+            echo -e "${YELLOW}[SKIP]${NC} $message"
+            ;;
+        fail|failed)
+            echo -e "${RED}[FAIL]${NC} $message"
+            ;;
+        info)
+            echo -e "[INFO] $message"
+            ;;
+    esac
+}
+
 # CLI flag storage (used before ANSWERS array is available)
 # These get copied to ANSWERS after check_prerequisites runs
 CLI_NAME=""
@@ -485,6 +515,7 @@ CLI_ROLE=""
 CLI_AREAS=""
 CLI_PREFERENCES=""
 SKIP_QUESTIONNAIRE=false
+VERBOSE=false
 
 # Parse command-line arguments
 # Runs BEFORE any other checks to allow --help/--version without prerequisites
@@ -521,6 +552,9 @@ parse_args() {
                 ;;
             --no-questionnaire)
                 SKIP_QUESTIONNAIRE=true
+                ;;
+            -v|--verbose)
+                VERBOSE=true
                 ;;
             --)
                 shift
@@ -804,7 +838,8 @@ run_step() {
     local step_function="$3"
 
     if is_step_complete "$step_id"; then
-        echo -e "${GREEN}^${NC} $step_name (already completed)"
+        show_status "skip" "$step_name (already completed)"
+        ((STEPS_SKIPPED++)) || true
         return 0
     fi
 
@@ -814,6 +849,11 @@ run_step() {
 
     if [[ $result -eq 0 ]]; then
         mark_step_complete "$step_id"
+        show_status "ok" "$step_name"
+        ((STEPS_INSTALLED++)) || true
+    else
+        show_status "fail" "$step_name"
+        ((STEPS_FAILED++)) || true
     fi
 
     return $result
