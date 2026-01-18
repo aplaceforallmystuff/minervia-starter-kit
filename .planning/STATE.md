@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 6 of 8 (Skills Installation)
-Plan: 0 of ? in current phase
-Status: Ready to plan
-Last activity: 2026-01-18 - Phase 5 verified complete
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-01-18 - Completed 06-01-PLAN.md
 
-Progress: [███████░░░] 62%
+Progress: [████████░░] 71%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
+- Total plans completed: 10
 - Average duration: 2.7 min
-- Total execution time: 24 min
+- Total execution time: 27 min
 
 **By Phase:**
 
@@ -32,9 +32,10 @@ Progress: [███████░░░] 62%
 | 03-questionnaire-engine | 2 | 6 min | 3 min |
 | 04-claudemd-generation | 2 | 6 min | 3 min |
 | 05-vault-scaffolding | 2 | 5 min | 2.5 min |
+| 06-skills-installation | 1 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (3 min), 04-01 (3 min), 04-02 (3 min), 05-01 (3 min), 05-02 (2 min)
+- Last 5 plans: 04-01 (3 min), 04-02 (3 min), 05-01 (3 min), 05-02 (2 min), 06-01 (3 min)
 - Trend: Consistent 2-3 min per plan
 
 *Updated after each plan completion*
@@ -79,6 +80,9 @@ Recent decisions affecting current work:
 - [05-02]: Example notes include wiki links to demonstrate Obsidian linking
 - [05-02]: scaffold_new_vault() gates all operations on IS_NEW_VAULT
 - [05-02]: User sees Templates folder configuration tip after scaffolding
+- [06-01]: Cross-platform MD5 using platform detection (md5 -q on macOS, md5sum on Linux)
+- [06-01]: JSON manipulation via awk instead of jq (no additional dependency)
+- [06-01]: state.json stores version, installed_at timestamp, and files array with checksums
 
 ### Pending Todos
 
@@ -91,5 +95,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Phase 5 verified complete, ready for Phase 6 planning
+Stopped at: Completed 06-01-PLAN.md
 Resume file: None
