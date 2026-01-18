@@ -687,6 +687,100 @@ record_installed_file() {
     mv "$temp_file" "$MINERVIA_STATE_FILE"
 }
 
+# ============================================================================
+# Skills/Agents Installation Functions
+# ============================================================================
+
+# Handle file conflict when MD5 differs
+# Args: source_path, target_path, display_name
+# Returns: 0 if replaced, 1 if kept existing
+handle_file_conflict() {
+    local source_path="$1"
+    local target_path="$2"
+    local display_name="$3"
+
+    echo ""
+    echo "========================================"
+    echo -e "${YELLOW}$display_name already exists and differs.${NC}"
+    echo "========================================"
+    echo ""
+    echo "Differences between existing and new:"
+    echo ""
+    show_colored_diff "$target_path" "$source_path"
+    echo ""
+    echo "========================================"
+    echo ""
+
+    local action
+    action=$(ask_choice "What would you like to do?" "Keep existing" "Backup and replace" "Replace (no backup)")
+
+    case "$action" in
+        "Keep existing")
+            echo -e "${YELLOW}→${NC} $display_name (keeping existing)"
+            return 1
+            ;;
+        "Backup and replace")
+            local backup_name="${target_path}.backup-$(date +%Y%m%d-%H%M%S)"
+            mv "$target_path" "$backup_name"
+            echo -e "${GREEN}✓${NC} Backup created: $(basename "$backup_name")"
+            cp "$source_path" "$target_path"
+            echo -e "${GREEN}✓${NC} $display_name replaced"
+            return 0
+            ;;
+        "Replace (no backup)")
+            cp "$source_path" "$target_path"
+            echo -e "${GREEN}✓${NC} $display_name replaced"
+            return 0
+            ;;
+    esac
+}
+
+# Install a single file with conflict detection
+# Args: source_path, target_path, display_name, relative_path (for state tracking)
+# Returns: 0 if installed, 1 if skipped
+install_single_file() {
+    local source_path="$1"
+    local target_path="$2"
+    local display_name="$3"
+    local rel_path="$4"
+
+    # Ensure target directory exists
+    local target_dir
+    target_dir=$(dirname "$target_path")
+    mkdir -p "$target_dir" 2>/dev/null || true
+
+    if [[ ! -f "$target_path" ]]; then
+        # Target doesn't exist - simple install
+        if cp "$source_path" "$target_path" 2>/dev/null; then
+            record_installed_file "$rel_path" "$target_path"
+            echo -e "${GREEN}✓${NC} $display_name"
+            return 0
+        else
+            echo -e "${RED}!${NC} Failed to install: $display_name" >&2
+            return 2
+        fi
+    fi
+
+    # Target exists - compare checksums
+    local source_md5 target_md5
+    source_md5=$(compute_md5 "$source_path")
+    target_md5=$(compute_md5 "$target_path")
+
+    if [[ "$source_md5" == "$target_md5" ]]; then
+        # Files are identical - skip
+        echo -e "${YELLOW}→${NC} $display_name (unchanged)"
+        return 1
+    fi
+
+    # Files differ - handle conflict
+    if handle_file_conflict "$source_path" "$target_path" "$display_name"; then
+        record_installed_file "$rel_path" "$target_path"
+        return 0
+    else
+        return 1
+    fi
+}
+
 # Platform-specific command wrappers
 # These handle differences between BSD (macOS) and GNU (Linux) tools
 
