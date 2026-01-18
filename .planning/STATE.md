@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 5 of 8 (Vault Scaffolding)
-Plan: 0 of ? in current phase
-Status: Ready to plan
-Last activity: 2026-01-18 - Phase 4 complete
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-01-18 - Completed 05-01-PLAN.md
 
-Progress: [██████░░░░] 50%
+Progress: [██████░░░░] 53%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
+- Total plans completed: 8
 - Average duration: 2.7 min
-- Total execution time: 19 min
+- Total execution time: 22 min
 
 **By Phase:**
 
@@ -31,9 +31,10 @@ Progress: [██████░░░░] 50%
 | 02-cli-interface | 2 | 5 min | 2.5 min |
 | 03-questionnaire-engine | 2 | 6 min | 3 min |
 | 04-claudemd-generation | 2 | 6 min | 3 min |
+| 05-vault-scaffolding | 1 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (3 min), 03-01 (3 min), 03-02 (3 min), 04-01 (3 min), 04-02 (3 min)
+- Last 5 plans: 03-01 (3 min), 03-02 (3 min), 04-01 (3 min), 04-02 (3 min), 05-01 (3 min)
 - Trend: Consistent 3 min per plan
 
 *Updated after each plan completion*
@@ -72,6 +73,9 @@ Recent decisions affecting current work:
 - [04-02]: macOS diff lacks --color, manual colorization via case statement
 - [04-02]: Three action options for existing files (no --force flag)
 - [04-02]: Temp file generation before conflict check for clean comparison
+- [05-01]: Templates use Obsidian core syntax ({{date:...}}, {{title}}) for compatibility
+- [05-01]: PARA folders include current year subfolder in 00 Daily
+- [05-01]: Templates folder nested under 04 Resources for organization
 
 ### Pending Todos
 
@@ -84,5 +88,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Phase 4 complete, ready for Phase 5 planning
+Stopped at: Completed 05-01-PLAN.md
 Resume file: None
