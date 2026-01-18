@@ -96,13 +96,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | CORE-01 | Phase 2 | Complete |
-| CORE-02 | Phase 7 | Pending |
+| CORE-02 | Phase 7 | Complete |
 | CORE-03 | Phase 1 | Complete |
 | CORE-04 | Phase 2 | Complete |
-| CORE-05 | Phase 7 | Pending |
-| CORE-06 | Phase 7 | Pending |
+| CORE-05 | Phase 7 | Complete |
+| CORE-06 | Phase 7 | Complete |
 | CORE-07 | Phase 1 | Complete |
-| CORE-08 | Phase 7 | Pending |
+| CORE-08 | Phase 7 | Complete |
 | CORE-09 | Phase 2 | Complete |
 | CORE-10 | Phase 2 | Complete |
 | ONBD-01 | Phase 3 | Complete |
@@ -132,4 +132,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-01-18*
-*Last updated: 2026-01-18 after roadmap creation*
+*Last updated: 2026-01-18 after Phase 7 completion*

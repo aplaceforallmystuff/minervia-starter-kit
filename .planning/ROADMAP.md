@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: CLAUDE.md Generation** - Template system and personalization
 - [x] **Phase 5: Vault Scaffolding** - PARA structure, templates, examples
 - [x] **Phase 6: Skills Installation** - Copy skills/agents with version tracking
-- [ ] **Phase 7: Idempotency and Safety** - Safe re-runs, confirmations, progress
+- [x] **Phase 7: Idempotency and Safety** - Safe re-runs, confirmations, progress
 - [ ] **Phase 8: Update System** - Self-update with customization preservation
 
 ## Phase Details
@@ -125,8 +125,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — Step tracking infrastructure, state validation, lock file protection
-- [ ] 07-02-PLAN.md — Progress feedback, verbose mode, saved answers, final summary
+- [x] 07-01-PLAN.md — Step tracking infrastructure, state validation, lock file protection
+- [x] 07-02-PLAN.md — Progress feedback, verbose mode, saved answers, final summary
 
 ### Phase 8: Update System
 **Goal**: Users can update Minervia while preserving their customizations
@@ -157,7 +157,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 4. CLAUDE.md Generation | 2/2 | Complete | 2026-01-18 |
 | 5. Vault Scaffolding | 2/2 | Complete | 2026-01-18 |
 | 6. Skills Installation | 2/2 | Complete | 2026-01-18 |
-| 7. Idempotency and Safety | 0/2 | Not started | - |
+| 7. Idempotency and Safety | 2/2 | Complete | 2026-01-18 |
 | 8. Update System | 0/? | Not started | - |
 
 ---
