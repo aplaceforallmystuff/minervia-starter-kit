@@ -227,9 +227,21 @@ Options:
   -h, --help      Show this help message and exit
   -V, --version   Show version number and exit
 
+Non-Interactive Mode:
+  For CI/automation, provide answers via flags:
+
+  --name NAME           Your name for Claude to use
+  --vault-path PATH     Full path to your Obsidian vault
+  --role ROLE           Your role (Developer, Designer, etc.)
+  --areas AREAS         Comma-separated key areas
+  --preferences PREFS   Comma-separated preferences
+  --no-questionnaire    Skip questionnaire (requires --name, --vault-path)
+
 Examples:
   ./install.sh              Run the installer
   ./install.sh --help       Show this help
+  ./install.sh --name "Jane Doe" --vault-path "/Users/jane/vault" --role "Developer"
+  ./install.sh --no-questionnaire --name "CI User" --vault-path "./test-vault"
 
 Prerequisites:
   - Claude Code CLI (https://claude.ai/download)
@@ -254,6 +266,20 @@ show_version() {
     echo "minervia-installer $VERSION"
 }
 
+# Check if running interactively (stdin is a TTY)
+is_interactive() {
+    [ -t 0 ]
+}
+
+# CLI flag storage (used before ANSWERS array is available)
+# These get copied to ANSWERS after check_prerequisites runs
+CLI_NAME=""
+CLI_VAULT_PATH=""
+CLI_ROLE=""
+CLI_AREAS=""
+CLI_PREFERENCES=""
+SKIP_QUESTIONNAIRE=false
+
 # Parse command-line arguments
 # Runs BEFORE any other checks to allow --help/--version without prerequisites
 parse_args() {
@@ -266,6 +292,29 @@ parse_args() {
             -V|--version)
                 show_version
                 exit 0
+                ;;
+            --name)
+                CLI_NAME="$2"
+                shift
+                ;;
+            --vault-path)
+                CLI_VAULT_PATH="$2"
+                shift
+                ;;
+            --role)
+                CLI_ROLE="$2"
+                shift
+                ;;
+            --areas)
+                CLI_AREAS="$2"
+                shift
+                ;;
+            --preferences)
+                CLI_PREFERENCES="$2"
+                shift
+                ;;
+            --no-questionnaire)
+                SKIP_QUESTIONNAIRE=true
                 ;;
             --)
                 shift
