@@ -1549,6 +1549,53 @@ check_optional_command() {
 }
 
 # ============================================================================
+# Step Wrappers (for idempotent re-runs)
+# ============================================================================
+
+# Wrapper for skills installation step
+do_install_skills() {
+    echo ""
+    echo "Installing Minervia skills..."
+    install_skills "$SKILLS_SOURCE" "$SKILLS_TARGET"
+}
+
+# Wrapper for agents installation step
+do_install_agents() {
+    echo ""
+    echo "Installing Minervia agents..."
+    install_agents "$AGENTS_SOURCE" "$AGENTS_TARGET"
+}
+
+# Wrapper for CLAUDE.md generation step
+do_generate_claudemd() {
+    echo ""
+    echo "Generating personalized CLAUDE.md..."
+
+    # Check template exists
+    if [[ ! -f "$TEMPLATE_DIR/CLAUDE.md.template" ]]; then
+        error_exit "Template not found: $TEMPLATE_DIR/CLAUDE.md.template" \
+            "Ensure you are running install.sh from the minervia-starter-kit directory"
+    fi
+
+    # Generate to temp file first
+    local temp_claudemd
+    temp_claudemd=$(mktemp)
+    TEMP_FILES+=("$temp_claudemd")
+    process_template "$TEMPLATE_DIR/CLAUDE.md.template" "$temp_claudemd"
+
+    if [[ -f "CLAUDE.md" ]]; then
+        # Existing file - show diff and prompt
+        handle_existing_claudemd "$temp_claudemd"
+    else
+        # New file - just move into place
+        mv "$temp_claudemd" "CLAUDE.md"
+        echo -e "${GREEN}✓${NC} CLAUDE.md created"
+        echo ""
+        echo -e "${YELLOW}!${NC} Edit CLAUDE.md to add your tools and update weekly focus"
+    fi
+}
+
+# ============================================================================
 # Main Installation
 # ============================================================================
 
@@ -1613,10 +1660,11 @@ fi
 cd "$VAULT_DIR" || error_exit "Cannot access vault directory: $VAULT_DIR"
 
 # Detect vault type (new vs existing)
+# Note: detect_vault_type runs every time to set IS_NEW_VAULT correctly
 detect_vault_type
 
-# Create PARA structure for new vaults
-scaffold_new_vault
+# Create PARA structure for new vaults (skip if already done)
+run_step "$STEP_SCAFFOLD" "Vault scaffolding" scaffold_new_vault
 
 # Check if this is an Obsidian vault
 if [ -d ".obsidian" ]; then
@@ -1643,39 +1691,10 @@ echo -e "${GREEN}✓${NC} State tracking initialized (~/.minervia/state.json)"
 SKILLS_TARGET="$HOME/.claude/skills"
 AGENTS_TARGET="$HOME/.claude/agents"
 
-echo ""
-echo "Installing Minervia skills..."
-install_skills "$SKILLS_SOURCE" "$SKILLS_TARGET"
-
-echo ""
-echo "Installing Minervia agents..."
-install_agents "$AGENTS_SOURCE" "$AGENTS_TARGET"
-
-# Generate CLAUDE.md from template
-echo ""
-echo "Generating personalized CLAUDE.md..."
-
-# Check template exists
-if [[ ! -f "$TEMPLATE_DIR/CLAUDE.md.template" ]]; then
-    error_exit "Template not found: $TEMPLATE_DIR/CLAUDE.md.template" \
-        "Ensure you are running install.sh from the minervia-starter-kit directory"
-fi
-
-# Generate to temp file first
-TEMP_CLAUDEMD=$(mktemp)
-TEMP_FILES+=("$TEMP_CLAUDEMD")
-process_template "$TEMPLATE_DIR/CLAUDE.md.template" "$TEMP_CLAUDEMD"
-
-if [[ -f "CLAUDE.md" ]]; then
-    # Existing file - show diff and prompt
-    handle_existing_claudemd "$TEMP_CLAUDEMD"
-else
-    # New file - just move into place
-    mv "$TEMP_CLAUDEMD" "CLAUDE.md"
-    echo -e "${GREEN}✓${NC} CLAUDE.md created"
-    echo ""
-    echo -e "${YELLOW}!${NC} Edit CLAUDE.md to add your tools and update weekly focus"
-fi
+# Run installation steps with skip detection for re-runs
+run_step "$STEP_SKILLS" "Installing skills" do_install_skills
+run_step "$STEP_AGENTS" "Installing agents" do_install_agents
+run_step "$STEP_CLAUDEMD" "Generating CLAUDE.md" do_generate_claudemd
 
 # Git setup (optional)
 echo ""
