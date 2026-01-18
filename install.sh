@@ -114,15 +114,9 @@ echo "Checking requirements..."
 echo ""
 
 # Check for Claude Code CLI
-if check_command "claude"; then
-    CLAUDE_OK=0
-else
-    CLAUDE_OK=1
+if ! check_command "claude"; then
     echo ""
-    echo -e "${RED}Claude Code CLI is required.${NC}"
-    echo "Install from: https://claude.ai/download"
-    echo ""
-    exit 1
+    error_exit "Claude Code CLI not found" "Install from https://claude.ai/download"
 fi
 
 # Optional checks
@@ -136,6 +130,16 @@ echo ""
 # Detect the vault directory (where install.sh was run from)
 VAULT_DIR="$(pwd)"
 SKILLS_SOURCE="$(dirname "$0")/skills"
+
+# Validate that current directory is writable
+if [[ ! -w "$VAULT_DIR" ]]; then
+    error_exit "Cannot write to current directory: $VAULT_DIR" "Check directory permissions or run from a different location"
+fi
+
+# Validate skills source directory exists
+if [[ ! -d "$SKILLS_SOURCE" ]]; then
+    error_exit "Skills directory not found: $SKILLS_SOURCE" "Ensure you are running install.sh from the minervia-starter-kit directory"
+fi
 
 # Check if this is an Obsidian vault
 if [ -d ".obsidian" ]; then
@@ -152,7 +156,14 @@ SKILLS_TARGET="$HOME/.claude/skills"
 echo ""
 echo "Installing Minervia skills..."
 
-mkdir -p "$SKILLS_TARGET"
+# Create skills directory with error handling
+if ! mkdir -p "$SKILLS_TARGET" 2>/dev/null; then
+    error_exit "Failed to create skills directory: $SKILLS_TARGET" "Check write permissions for $HOME/.claude/"
+fi
+
+# Track skills installed for summary
+skills_installed=0
+skills_skipped=0
 
 for skill_dir in "$SKILLS_SOURCE"/*/; do
     if [ -d "$skill_dir" ]; then
@@ -161,12 +172,21 @@ for skill_dir in "$SKILLS_SOURCE"/*/; do
 
         if [ -d "$target_dir" ]; then
             echo -e "${YELLOW}→${NC} $skill_name (already exists, skipping)"
+            ((skills_skipped++)) || true
         else
-            cp -r "$skill_dir" "$target_dir"
+            if ! cp -r "$skill_dir" "$target_dir" 2>/dev/null; then
+                error_exit "Failed to install skill: $skill_name" "Check disk space and permissions for $SKILLS_TARGET/"
+            fi
             echo -e "${GREEN}✓${NC} $skill_name"
+            ((skills_installed++)) || true
         fi
     fi
 done
+
+# Verify at least some skills exist (either installed now or previously)
+if [[ $skills_installed -eq 0 && $skills_skipped -eq 0 ]]; then
+    error_exit "No skills found in $SKILLS_SOURCE" "Ensure the minervia-starter-kit is complete"
+fi
 
 # Create CLAUDE.md if it doesn't exist
 if [ ! -f "CLAUDE.md" ]; then
@@ -281,7 +301,9 @@ else
 fi
 
 # Create .claude directory if needed
-mkdir -p ".claude"
+if ! mkdir -p ".claude" 2>/dev/null; then
+    error_exit "Failed to create .claude directory" "Check write permissions for $VAULT_DIR"
+fi
 
 # Add welcome hook for first-time users (only if .claude/settings.json doesn't exist)
 if [ ! -f ".claude/settings.json" ]; then
