@@ -13,7 +13,7 @@ This roadmap transforms the existing Minervia starter kit into a complete end-to
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Error handling, strict mode, platform detection
-- [ ] **Phase 2: CLI Interface** - Help, version, prerequisites checking
+- [x] **Phase 2: CLI Interface** - Help, version, prerequisites checking
 - [ ] **Phase 3: Questionnaire Engine** - Interactive prompts for user context
 - [ ] **Phase 4: CLAUDE.md Generation** - Template system and personalization
 - [ ] **Phase 5: Vault Scaffolding** - PARA structure, templates, examples
@@ -50,8 +50,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Add VERSION constant, --help and --version flags with argument parsing
-- [ ] 02-02-PLAN.md — Refactor prerequisite checks (Bash version, Claude CLI, write permissions)
+- [x] 02-01-PLAN.md — Add VERSION constant, --help and --version flags with argument parsing
+- [x] 02-02-PLAN.md — Refactor prerequisite checks (Bash version, Claude CLI, write permissions)
 
 ### Phase 3: Questionnaire Engine
 **Goal**: Installer captures user context through interactive prompts
@@ -147,7 +147,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 1/1 | Complete | 2026-01-18 |
-| 2. CLI Interface | 0/2 | Not started | - |
+| 2. CLI Interface | 2/2 | Complete | 2026-01-18 |
 | 3. Questionnaire Engine | 0/? | Not started | - |
 | 4. CLAUDE.md Generation | 0/? | Not started | - |
 | 5. Vault Scaffolding | 0/? | Not started | - |
