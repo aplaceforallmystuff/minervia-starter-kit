@@ -191,50 +191,61 @@ check_bash_version() {
     fi
 }
 
-# ============================================================================
-# Main Installation
-# ============================================================================
+# Check for Claude Code CLI
+check_claude_cli() {
+    if ! command -v claude &> /dev/null; then
+        error_exit "Claude Code CLI not found" \
+            "Install from https://claude.ai/download"
+    fi
+}
 
-echo "🦉 Minervia Setup"
-echo "================"
-echo ""
+# Check write permissions for a directory
+check_write_permissions() {
+    local target_dir="$1"
+    if [[ ! -w "$target_dir" ]]; then
+        error_exit "Cannot write to directory: $target_dir" \
+            "Check permissions or run from a different location"
+    fi
+}
 
-# Check for required tools
-check_command() {
+# Run all prerequisite checks
+# Called AFTER argument parsing so --help works without prerequisites
+check_prerequisites() {
+    check_bash_version
+    check_claude_cli
+    # Write permissions checked later when we know VAULT_DIR
+}
+
+# Check for optional tools (used for informational display)
+check_optional_command() {
     if command -v "$1" &> /dev/null; then
         echo -e "${GREEN}✓${NC} $1"
         return 0
     else
-        echo -e "${RED}✗${NC} $1 not found"
+        echo -e "${YELLOW}○${NC} $1 not found"
         return 1
     fi
 }
 
-echo "Checking requirements..."
+# ============================================================================
+# Main Installation
+# ============================================================================
+
+echo "Minervia Setup"
+echo "=============="
 echo ""
 
-# Check for Claude Code CLI
-if ! check_command "claude"; then
-    echo ""
-    error_exit "Claude Code CLI not found" "Install from https://claude.ai/download"
-fi
+check_prerequisites
 
-# Optional checks
-echo ""
-echo "Optional tools (for full functionality):"
-check_command "git" || echo "   → Version control for your vault"
-check_command "jq" || echo "   → Install with: brew install jq"
-
+echo -e "${GREEN}✓${NC} Prerequisites validated"
 echo ""
 
 # Detect the vault directory (where install.sh was run from)
 VAULT_DIR="$(pwd)"
 SKILLS_SOURCE="$(dirname "$0")/skills"
 
-# Validate that current directory is writable
-if [[ ! -w "$VAULT_DIR" ]]; then
-    error_exit "Cannot write to current directory: $VAULT_DIR" "Check directory permissions or run from a different location"
-fi
+# Validate write permissions to vault directory
+check_write_permissions "$VAULT_DIR"
 
 # Validate skills source directory exists
 if [[ ! -d "$SKILLS_SOURCE" ]]; then
