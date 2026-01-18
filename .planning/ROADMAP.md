@@ -32,10 +32,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Error messages are human-readable with actionable recovery steps (not stack traces or cryptic codes)
   3. Platform differences (macOS BSD vs Linux GNU) are detected and handled
   4. Script uses strict mode (set -euo pipefail) with proper trap handlers
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 01-01: TBD
+- [ ] 01-01-PLAN.md — Strict mode, trap handlers, platform detection, error handling infrastructure
 
 ### Phase 2: CLI Interface
 **Goal**: Installer follows CLI conventions and validates environment before proceeding
@@ -145,7 +145,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/? | Not started | - |
+| 1. Foundation | 0/1 | Planned | - |
 | 2. CLI Interface | 0/? | Not started | - |
 | 3. Questionnaire Engine | 0/? | Not started | - |
 | 4. CLAUDE.md Generation | 0/? | Not started | - |
