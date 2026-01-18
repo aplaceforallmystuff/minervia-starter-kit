@@ -105,8 +105,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CORE-08 | Phase 7 | Pending |
 | CORE-09 | Phase 2 | Complete |
 | CORE-10 | Phase 2 | Complete |
-| ONBD-01 | Phase 3 | Pending |
-| ONBD-02 | Phase 3 | Pending |
+| ONBD-01 | Phase 3 | Complete |
+| ONBD-02 | Phase 3 | Complete |
 | ONBD-03 | Phase 4 | Pending |
 | ONBD-04 | Phase 4 | Pending |
 | ONBD-05 | Phase 4 | Pending |

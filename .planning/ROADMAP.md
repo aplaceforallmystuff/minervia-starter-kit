@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Error handling, strict mode, platform detection
 - [x] **Phase 2: CLI Interface** - Help, version, prerequisites checking
-- [ ] **Phase 3: Questionnaire Engine** - Interactive prompts for user context
+- [x] **Phase 3: Questionnaire Engine** - Interactive prompts for user context
 - [ ] **Phase 4: CLAUDE.md Generation** - Template system and personalization
 - [ ] **Phase 5: Vault Scaffolding** - PARA structure, templates, examples
 - [ ] **Phase 6: Skills Installation** - Copy skills/agents with version tracking
@@ -65,8 +65,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Gum detection, ANSWERS array, dual-mode input functions, CLI flags
-- [ ] 03-02-PLAN.md — Questionnaire flow, progress indicator, summary/edit, main integration
+- [x] 03-01-PLAN.md — Gum detection, ANSWERS array, dual-mode input functions, CLI flags
+- [x] 03-02-PLAN.md — Questionnaire flow, progress indicator, summary/edit, main integration
 
 ### Phase 4: CLAUDE.md Generation
 **Goal**: Installer generates personalized CLAUDE.md from questionnaire answers
@@ -149,7 +149,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 |-------|----------------|--------|-----------|
 | 1. Foundation | 1/1 | Complete | 2026-01-18 |
 | 2. CLI Interface | 2/2 | Complete | 2026-01-18 |
-| 3. Questionnaire Engine | 0/2 | Planned | - |
+| 3. Questionnaire Engine | 2/2 | Complete | 2026-01-18 |
 | 4. CLAUDE.md Generation | 0/? | Not started | - |
 | 5. Vault Scaffolding | 0/? | Not started | - |
 | 6. Skills Installation | 0/? | Not started | - |
