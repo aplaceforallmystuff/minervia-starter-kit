@@ -55,6 +55,40 @@ show_version() {
     echo "minervia-installer $VERSION"
 }
 
+# Parse command-line arguments
+# Runs BEFORE any other checks to allow --help/--version without prerequisites
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -h|--help)
+                show_help
+                exit 0
+                ;;
+            -V|--version)
+                show_version
+                exit 0
+                ;;
+            --)
+                shift
+                break
+                ;;
+            -*)
+                echo "Unknown option: $1" >&2
+                echo "Run '$(basename "$0") --help' for usage" >&2
+                exit 2
+                ;;
+            *)
+                # Non-option argument, stop parsing
+                break
+                ;;
+        esac
+        shift
+    done
+}
+
+# Parse arguments first (--help/--version work without prerequisites)
+parse_args "$@"
+
 # Track temporary files for cleanup
 TEMP_FILES=()
 
@@ -129,6 +163,31 @@ portable_stat_mtime() {
         stat -f %m "$file"
     else
         stat -c %Y "$file"
+    fi
+}
+
+# ============================================================================
+# Prerequisite Checks
+# ============================================================================
+
+# Check Bash version (4.0+ required for associative arrays and other features)
+check_bash_version() {
+    local min_major=4
+    local min_minor=0
+
+    # BASH_VERSINFO is a built-in array: [0]=major, [1]=minor, [2]=patch
+    if [[ -z "${BASH_VERSINFO[0]:-}" ]]; then
+        error_exit "Cannot determine Bash version" \
+            "Ensure you are running this script with Bash"
+    fi
+
+    local current_major="${BASH_VERSINFO[0]}"
+    local current_minor="${BASH_VERSINFO[1]}"
+
+    if [[ $current_major -lt $min_major ]] || \
+       [[ $current_major -eq $min_major && $current_minor -lt $min_minor ]]; then
+        error_exit "Bash ${min_major}.${min_minor}+ required (found ${BASH_VERSION})" \
+            "Upgrade Bash: brew install bash (macOS) or apt install bash (Linux)"
     fi
 }
 
