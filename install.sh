@@ -919,6 +919,9 @@ fi
 # Change to vault directory for installation operations
 cd "$VAULT_DIR" || error_exit "Cannot access vault directory: $VAULT_DIR"
 
+# Detect vault type (new vs existing)
+detect_vault_type
+
 # Check if this is an Obsidian vault
 if [ -d ".obsidian" ]; then
     echo -e "${GREEN}✓${NC} Obsidian vault detected"
@@ -965,98 +968,30 @@ if [[ $skills_installed -eq 0 && $skills_skipped -eq 0 ]]; then
     error_exit "No skills found in $SKILLS_SOURCE" "Ensure the minervia-starter-kit is complete"
 fi
 
-# Create CLAUDE.md if it doesn't exist
-if [ ! -f "CLAUDE.md" ]; then
-    echo ""
-    echo "Creating CLAUDE.md template..."
+# Generate CLAUDE.md from template
+echo ""
+echo "Generating personalized CLAUDE.md..."
 
-    # Get vault name from directory
-    VAULT_NAME=$(basename "$VAULT_DIR")
+# Check template exists
+if [[ ! -f "$TEMPLATE_DIR/CLAUDE.md.template" ]]; then
+    error_exit "Template not found: $TEMPLATE_DIR/CLAUDE.md.template" \
+        "Ensure you are running install.sh from the minervia-starter-kit directory"
+fi
 
-    cat > CLAUDE.md << 'CLAUDEMD'
-# CLAUDE.md
+# Generate to temp file first
+TEMP_CLAUDEMD=$(mktemp)
+TEMP_FILES+=("$TEMP_CLAUDEMD")
+process_template "$TEMPLATE_DIR/CLAUDE.md.template" "$TEMP_CLAUDEMD"
 
-This vault is configured with Minervia — a co-operating system for human-led knowledge work.
-
-## Vault Configuration
-
-<!-- Update these paths to match your vault structure -->
-
-```yaml
-vault:
-  name: "My Vault"
-  daily_notes: "Daily/"           # Where daily notes live (e.g., "00 Daily/YYYY/")
-  inbox: "Inbox/"                 # Quick capture location
-  projects: "Projects/"           # Active projects
-  areas: "Areas/"                 # Ongoing responsibilities
-  resources: "Resources/"         # Reference materials
-  archive: "Archive/"             # Completed/inactive items
-```
-
-## How Minervia Works
-
-You lead. AI assists. Your vault remembers.
-
-The terminal is your interface. Skills extend what's possible. Context compounds over time.
-
-### Available Skills
-
-After installation, these skills are available in any vault:
-
-| Skill | Purpose |
-|-------|---------|
-| `/log-to-daily` | Log session activity to today's daily note |
-| `/log-to-project` | Document work to a project folder |
-| `/lessons-learned` | Run a structured retrospective |
-| `/start-project` | Initialize a new project with proper structure |
-| `/weekly-review` | Process inbox and maintain vault health |
-| `/think-first` | Apply mental models before major decisions |
-
-### Starting a Session
-
-```bash
-cd /path/to/your/vault
-claude
-```
-
-Then: describe what you're working on. Claude reads your vault, understands your context, and helps you think.
-
-### Ending a Session
-
-Before ending, run `/log-to-daily` to capture what happened. This creates the compound effect — tomorrow's Claude knows what you did today.
-
-## Workflow Guidelines
-
-### The Compound Loop
-
-Work → Conversation → Skill invocation → Vault update → Informed future work
-
-Every session that updates your vault makes the next session smarter.
-
-### When to Use Each Skill
-
-- **Starting work**: Describe the task, let Claude search relevant context
-- **Making decisions**: `/think-first` with a mental model
-- **Ending session**: `/log-to-daily` for continuity
-- **Completing milestones**: `/log-to-project` for documentation
-- **After failures or wins**: `/lessons-learned` for structured reflection
-- **Weekly**: `/weekly-review` to maintain vault health
-
-## Customization
-
-Edit the vault configuration above to match your folder structure. Minervia skills are vault-agnostic — they work with PARA, Zettelkasten, or any organization system.
-
----
-
-*Minervia: Terminal-native AI for knowledge workers.*
-CLAUDEMD
-
+if [[ -f "CLAUDE.md" ]]; then
+    # Existing file - show diff and prompt
+    handle_existing_claudemd "$TEMP_CLAUDEMD"
+else
+    # New file - just move into place
+    mv "$TEMP_CLAUDEMD" "CLAUDE.md"
     echo -e "${GREEN}✓${NC} CLAUDE.md created"
     echo ""
-    echo -e "${YELLOW}!${NC} Edit CLAUDE.md to match your vault structure"
-else
-    echo ""
-    echo -e "${YELLOW}→${NC} CLAUDE.md already exists (not overwritten)"
+    echo -e "${YELLOW}!${NC} Edit CLAUDE.md to add your tools and update weekly focus"
 fi
 
 # Git setup (optional)
