@@ -829,6 +829,114 @@ mark_step_complete() {
     mv "$temp_file" "$MINERVIA_STATE_FILE"
 }
 
+# Save questionnaire answers to state.json for re-runs
+save_questionnaire_answers() {
+    local temp_file
+    temp_file=$(mktemp)
+    TEMP_FILES+=("$temp_file")
+
+    # Build answers JSON (escape special characters in values)
+    local name_escaped role_escaped areas_escaped prefs_escaped vault_escaped
+    name_escaped=$(printf '%s' "${ANSWERS[name]:-}" | sed 's/"/\\"/g')
+    role_escaped=$(printf '%s' "${ANSWERS[role]:-}" | sed 's/"/\\"/g')
+    areas_escaped=$(printf '%s' "${ANSWERS[areas]:-}" | sed 's/"/\\"/g')
+    prefs_escaped=$(printf '%s' "${ANSWERS[preferences]:-}" | sed 's/"/\\"/g')
+    vault_escaped=$(printf '%s' "${ANSWERS[vault_path]:-}" | sed 's/"/\\"/g')
+
+    # Check if questionnaire_answers already exists
+    if grep -q '"questionnaire_answers"' "$MINERVIA_STATE_FILE" 2>/dev/null; then
+        # Update existing - remove old block and add new
+        awk '
+            /"questionnaire_answers"/ { skip = 1 }
+            skip && /^  \}/ { skip = 0; next }
+            !skip { print }
+        ' "$MINERVIA_STATE_FILE" > "$temp_file"
+        # Add new answers before closing brace
+        head -n -1 "$temp_file" > "${temp_file}.tmp"
+        mv "${temp_file}.tmp" "$temp_file"
+        cat >> "$temp_file" << ANSWERS_JSON
+  "questionnaire_answers": {
+    "name": "$name_escaped",
+    "vault_path": "$vault_escaped",
+    "role": "$role_escaped",
+    "areas": "$areas_escaped",
+    "preferences": "$prefs_escaped"
+  }
+}
+ANSWERS_JSON
+    else
+        # Insert before closing brace
+        head -n -1 "$MINERVIA_STATE_FILE" > "$temp_file"
+        cat >> "$temp_file" << ANSWERS_JSON
+  ,"questionnaire_answers": {
+    "name": "$name_escaped",
+    "vault_path": "$vault_escaped",
+    "role": "$role_escaped",
+    "areas": "$areas_escaped",
+    "preferences": "$prefs_escaped"
+  }
+}
+ANSWERS_JSON
+    fi
+
+    mv "$temp_file" "$MINERVIA_STATE_FILE"
+}
+
+# Check if saved questionnaire answers exist
+has_saved_answers() {
+    [[ -f "$MINERVIA_STATE_FILE" ]] && \
+    grep -q '"questionnaire_answers"' "$MINERVIA_STATE_FILE" 2>/dev/null
+}
+
+# Load questionnaire answers from state.json into ANSWERS array
+load_saved_answers() {
+    if [[ ! -f "$MINERVIA_STATE_FILE" ]]; then
+        return 1
+    fi
+
+    # Extract values using awk (handles quoted strings)
+    ANSWERS[name]=$(awk -F'"' '/"name":/ {print $4}' "$MINERVIA_STATE_FILE" | head -1)
+    ANSWERS[vault_path]=$(awk -F'"' '/"vault_path":/ {print $4}' "$MINERVIA_STATE_FILE" | head -1)
+    ANSWERS[role]=$(awk -F'"' '/"role":/ {print $4}' "$MINERVIA_STATE_FILE" | head -1)
+    ANSWERS[areas]=$(awk -F'"' '/"areas":/ {print $4}' "$MINERVIA_STATE_FILE" | head -1)
+    ANSWERS[preferences]=$(awk -F'"' '/"preferences":/ {print $4}' "$MINERVIA_STATE_FILE" | head -1)
+}
+
+# Handle re-run with existing saved answers
+# Returns: 0 if answers ready (loaded or fresh), 1 if should exit
+handle_saved_answers() {
+    if ! has_saved_answers; then
+        return 1  # No saved answers, proceed with questionnaire
+    fi
+
+    load_saved_answers
+    echo ""
+    echo "Found saved configuration from previous install:"
+    show_summary
+
+    local action
+    action=$(ask_choice "What would you like to do?" \
+        "Use saved settings" \
+        "Edit settings" \
+        "Start fresh")
+
+    case "$action" in
+        "Use saved settings")
+            return 0
+            ;;
+        "Edit settings")
+            if ! confirm_summary; then
+                run_questionnaire
+            fi
+            return 0
+            ;;
+        "Start fresh")
+            run_questionnaire
+            return 0
+            ;;
+    esac
+}
+
 # Run a step if not already complete
 # Args: step_id, step_name (display), step_function (to call)
 # Returns: 0 if step completed (now or previously), non-zero on failure
@@ -1660,6 +1768,10 @@ echo ""
 # Gum detection and install offer
 offer_gum_install
 
+# Initialize state file early (needed for saved answers check)
+# Note: Full state validation happens later after vault path is known
+init_state_file 2>/dev/null || true
+
 # Run questionnaire (interactive or skip if flags provided)
 if [[ "${SKIP_QUESTIONNAIRE:-false}" == "true" ]]; then
     echo "Skipping questionnaire (--no-questionnaire)"
@@ -1674,9 +1786,14 @@ elif ! is_interactive; then
         error_exit "Non-interactive mode requires --name and --vault-path" \
             "Run with: ./install.sh --name \"Your Name\" --vault-path \"/path/to/vault\""
     fi
+elif handle_saved_answers; then
+    : # Answers loaded from saved, continue
 else
     run_questionnaire
 fi
+
+# Save answers for future re-runs
+save_questionnaire_answers
 
 echo ""
 echo "Installing Minervia..."
@@ -1715,8 +1832,8 @@ else
     echo ""
 fi
 
-# Initialize state tracking before any installation
-echo "Initializing state tracking..."
+# Validate and update state tracking
+verbose "Validating state file..."
 init_state_file
 
 # Validate state file and recover if corrupted
@@ -1725,7 +1842,7 @@ if ! validate_state_file "$MINERVIA_STATE_FILE"; then
     mv "$MINERVIA_STATE_FILE" "${MINERVIA_STATE_FILE}.corrupted-$(date +%Y%m%d)"
     init_state_file
 fi
-echo -e "${GREEN}✓${NC} State tracking initialized (~/.minervia/state.json)"
+verbose "State tracking ready (~/.minervia/state.json)"
 
 # Install skills and agents to user's Claude Code directory
 SKILLS_TARGET="$HOME/.claude/skills"
