@@ -618,6 +618,97 @@ portable_stat_mtime() {
 }
 
 # ============================================================================
+# Vault Detection and Template Processing
+# ============================================================================
+
+# Global flag for vault type (set by detect_vault_type)
+IS_NEW_VAULT=false
+
+# Detect if vault is new (empty) or existing (has content)
+# Sets IS_NEW_VAULT global and prints detection result
+detect_vault_type() {
+    # Check for non-hidden files only (hidden files like .git, .obsidian are infrastructure)
+    shopt -s nullglob
+    local files=("$VAULT_DIR"/*)
+    shopt -u nullglob
+
+    if [[ ${#files[@]} -eq 0 ]]; then
+        IS_NEW_VAULT=true
+        echo -e "${GREEN}Detected:${NC} New vault (empty directory)"
+    else
+        IS_NEW_VAULT=false
+        local count=${#files[@]}
+        echo -e "${YELLOW}Detected:${NC} Existing vault ($count visible items)"
+    fi
+    export IS_NEW_VAULT
+}
+
+# Escape special sed characters in user input
+# Prevents sed injection from user-provided values
+escape_for_sed() {
+    printf '%s' "$1" | sed -e 's/[&/\]/\\&/g'
+}
+
+# Format comma-separated values as markdown bullet list
+# Args: csv_string, default_placeholder
+# Returns: Multi-line bullet list or default if empty
+format_as_bullets() {
+    local csv="$1"
+    local default="${2:-[Not specified]}"
+
+    if [[ -z "$csv" ]]; then
+        echo "$default"
+        return
+    fi
+
+    # Convert CSV to bullet list, trimming whitespace
+    echo "$csv" | tr ',' '\n' | while read -r item; do
+        item=$(echo "$item" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+        [[ -n "$item" ]] && echo "- $item"
+    done
+}
+
+# Process template file with user answers
+# Args: template_file, output_file
+# Substitutes placeholders with values from ANSWERS array
+process_template() {
+    local template_file="$1"
+    local output_file="$2"
+
+    # Read template content
+    local content
+    content=$(<"$template_file")
+
+    # Escape user input for safe sed substitution
+    local escaped_name escaped_role
+    escaped_name=$(escape_for_sed "${ANSWERS[name]:-}")
+    escaped_role=$(escape_for_sed "${ANSWERS[role]:-[Your role]}")
+
+    # Substitute simple placeholders using # delimiter to avoid path conflicts
+    content=$(echo "$content" | sed "s#{{NAME}}#$escaped_name#g")
+    content=$(echo "$content" | sed "s#{{ROLE}}#$escaped_role#g")
+    content=$(echo "$content" | sed "s#{{DATE}}#$(date +%Y-%m-%d)#g")
+
+    # Format multi-value fields as bullet lists
+    local areas_formatted prefs_formatted
+    areas_formatted=$(format_as_bullets "${ANSWERS[areas]:-}" "[Add your key focus areas here]")
+    prefs_formatted=$(format_as_bullets "${ANSWERS[preferences]:-}" "- I prefer concise, direct communication\n- Create files in appropriate PARA locations based on content type\n- Document work sessions in daily notes\n- Use [[wiki links]] to connect related content\n- When creating project notes, include clear next actions")
+
+    # Write to temp file for multi-line substitution with awk
+    echo "$content" > "$output_file.tmp"
+    TEMP_FILES+=("$output_file.tmp")
+
+    # Use awk for multi-line placeholder substitution
+    awk -v areas="$areas_formatted" -v prefs="$prefs_formatted" '
+        /\{\{AREAS\}\}/ { print areas; next }
+        /\{\{PREFERENCES\}\}/ { print prefs; next }
+        { print }
+    ' "$output_file.tmp" > "$output_file"
+
+    rm -f "$output_file.tmp"
+}
+
+# ============================================================================
 # Prerequisite Checks
 # ============================================================================
 
@@ -725,6 +816,7 @@ echo ""
 # Use vault path from questionnaire, or fall back to current directory
 VAULT_DIR="${ANSWERS[vault_path]:-$(pwd)}"
 SKILLS_SOURCE="$(dirname "$0")/skills"
+TEMPLATE_DIR="$(dirname "$0")/templates"
 
 # Validate write permissions to vault directory
 check_write_permissions "$VAULT_DIR"
