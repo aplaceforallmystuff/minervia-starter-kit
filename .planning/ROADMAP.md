@@ -77,10 +77,11 @@ Plans:
   2. Installer correctly detects new vs existing vault
   3. For existing vaults, installer preserves existing CLAUDE.md (prompts before overwrite)
   4. Generated CLAUDE.md includes vault overview, current focus, working preferences, and key contexts
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: TBD
+- [ ] 04-01-PLAN.md — Template file with placeholders, vault detection, template processing functions
+- [ ] 04-02-PLAN.md — Diff display, existing file handling, replace heredoc with template generation
 
 ### Phase 5: Vault Scaffolding
 **Goal**: New vaults have complete PARA structure with templates and examples
@@ -150,7 +151,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 1. Foundation | 1/1 | Complete | 2026-01-18 |
 | 2. CLI Interface | 2/2 | Complete | 2026-01-18 |
 | 3. Questionnaire Engine | 2/2 | Complete | 2026-01-18 |
-| 4. CLAUDE.md Generation | 0/? | Not started | - |
+| 4. CLAUDE.md Generation | 0/2 | Not started | - |
 | 5. Vault Scaffolding | 0/? | Not started | - |
 | 6. Skills Installation | 0/? | Not started | - |
 | 7. Idempotency and Safety | 0/? | Not started | - |
