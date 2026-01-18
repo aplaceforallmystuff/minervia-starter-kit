@@ -709,6 +709,96 @@ process_template() {
 }
 
 # ============================================================================
+# Existing File Handling
+# ============================================================================
+
+# Display colored unified diff (macOS compatible - no --color flag)
+# Args: existing_file, proposed_file
+show_colored_diff() {
+    local existing="$1"
+    local proposed="$2"
+
+    # Generate unified diff and colorize manually
+    diff -u "$existing" "$proposed" | while IFS= read -r line; do
+        case "$line" in
+            ---*)
+                echo -e "${RED}$line${NC}"
+                ;;
+            +++*)
+                echo -e "${GREEN}$line${NC}"
+                ;;
+            @@*)
+                echo -e "${YELLOW}$line${NC}"
+                ;;
+            -*)
+                echo -e "${RED}$line${NC}"
+                ;;
+            +*)
+                echo -e "${GREEN}$line${NC}"
+                ;;
+            *)
+                echo "$line"
+                ;;
+        esac
+    done
+}
+
+# Handle existing CLAUDE.md conflict
+# Args: proposed_file (path to newly generated temp file)
+handle_existing_claudemd() {
+    local proposed_file="$1"
+
+    echo ""
+    echo "========================================"
+    echo -e "${YELLOW}CLAUDE.md already exists in this vault.${NC}"
+    echo "========================================"
+    echo ""
+    echo "Differences between existing and new:"
+    echo ""
+    show_colored_diff "CLAUDE.md" "$proposed_file"
+    echo ""
+    echo "========================================"
+    echo ""
+
+    local action
+    if $HAS_GUM; then
+        action=$(gum choose "Keep existing" "Backup and replace" "Replace (no backup)")
+    else
+        echo "What would you like to do?"
+        echo "  1) Keep existing"
+        echo "  2) Backup and replace"
+        echo "  3) Replace (no backup)"
+        while true; do
+            read -p "Enter choice (1-3): " choice
+            case "$choice" in
+                1) action="Keep existing"; break ;;
+                2) action="Backup and replace"; break ;;
+                3) action="Replace (no backup)"; break ;;
+                *) echo -e "${RED}Invalid selection. Enter 1, 2, or 3.${NC}" ;;
+            esac
+        done
+    fi
+
+    case "$action" in
+        "Keep existing")
+            echo -e "${GREEN}✓${NC} Keeping existing CLAUDE.md"
+            rm -f "$proposed_file"
+            ;;
+        "Backup and replace")
+            local backup_name="CLAUDE.md.backup-$(date +%Y%m%d-%H%M)"
+            mv "CLAUDE.md" "$backup_name"
+            echo -e "${GREEN}✓${NC} Backup created: $backup_name"
+            mv "$proposed_file" "CLAUDE.md"
+            echo -e "${GREEN}✓${NC} CLAUDE.md replaced with new version"
+            ;;
+        "Replace (no backup)")
+            mv "$proposed_file" "CLAUDE.md"
+            echo -e "${GREEN}✓${NC} CLAUDE.md replaced"
+            ;;
+    esac
+}
+
+# ============================================================================
 # Prerequisite Checks
 # ============================================================================
 
