@@ -17,6 +17,53 @@ NC='\033[0m' # No Color
 # Version - single source of truth
 readonly VERSION="1.0.0"
 
+# ============================================================================
+# Gum Detection
+# ============================================================================
+
+# Gum provides enhanced interactive prompts when available
+HAS_GUM=false
+
+# Check if Gum CLI is installed
+check_gum() {
+    if command -v gum &> /dev/null; then
+        HAS_GUM=true
+        return 0
+    fi
+    return 1
+}
+
+# Offer to install Gum for better experience
+offer_gum_install() {
+    if check_gum; then
+        return 0
+    fi
+
+    echo ""
+    echo "Gum provides a better installation experience with styled prompts."
+    echo ""
+
+    local install_gum
+    read -p "Install Gum for a better experience? (y/N) " install_gum
+
+    if [[ "$install_gum" =~ ^[Yy] ]]; then
+        if command -v brew &> /dev/null; then
+            echo "Installing Gum via Homebrew..."
+            if brew install gum; then
+                HAS_GUM=true
+                echo -e "${GREEN}✓${NC} Gum installed"
+            else
+                echo -e "${YELLOW}!${NC} Gum installation failed, continuing with basic prompts"
+            fi
+        else
+            echo -e "${YELLOW}!${NC} Homebrew not found. Install Gum manually: https://github.com/charmbracelet/gum"
+            echo "   Continuing with basic prompts..."
+        fi
+    else
+        echo "Continuing with basic prompts..."
+    fi
+}
+
 # Display help message
 show_help() {
     cat << 'EOF'
@@ -236,6 +283,9 @@ echo "=============="
 echo ""
 
 check_prerequisites
+
+# Initialize ANSWERS array (after Bash 4.0+ verified by check_prerequisites)
+declare -A ANSWERS
 
 echo -e "${GREEN}✓${NC} Prerequisites validated"
 echo ""
