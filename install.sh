@@ -588,6 +588,105 @@ detect_platform() {
 detect_platform
 export PLATFORM
 
+# ============================================================================
+# State Tracking
+# ============================================================================
+
+MINERVIA_STATE_DIR="$HOME/.minervia"
+MINERVIA_STATE_FILE="$MINERVIA_STATE_DIR/state.json"
+
+# Cross-platform MD5 computation
+# Args: file_path
+# Returns: 32-character MD5 hash (no filename)
+compute_md5() {
+    local file="$1"
+    if [[ "$PLATFORM" == "macos" ]]; then
+        md5 -q "$file"
+    else
+        md5sum "$file" | cut -d' ' -f1
+    fi
+}
+
+# Initialize ~/.minervia/state.json
+# Creates directory and state file if they don't exist
+# Updates version if state file already exists
+init_state_file() {
+    # Create directory if needed
+    if ! mkdir -p "$MINERVIA_STATE_DIR" 2>/dev/null; then
+        echo -e "${YELLOW}!${NC} Could not create $MINERVIA_STATE_DIR" >&2
+        return 1
+    fi
+
+    if [[ ! -f "$MINERVIA_STATE_FILE" ]]; then
+        # Create new state file
+        cat > "$MINERVIA_STATE_FILE" << EOF
+{
+  "version": "$VERSION",
+  "installed_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "files": []
+}
+EOF
+    else
+        # Update version in existing state file
+        # Use portable_sed_inplace for cross-platform compatibility
+        local temp_file
+        temp_file=$(mktemp)
+        TEMP_FILES+=("$temp_file")
+
+        # Update version using awk (more portable than sed for in-place JSON)
+        awk -v ver="$VERSION" '
+            /"version":/ { gsub(/"version": *"[^"]*"/, "\"version\": \"" ver "\""); }
+            { print }
+        ' "$MINERVIA_STATE_FILE" > "$temp_file"
+
+        mv "$temp_file" "$MINERVIA_STATE_FILE"
+    fi
+}
+
+# Record an installed file in state.json manifest
+# Args: relative_path (e.g., "skills/log-to-daily/SKILL.md"), absolute_path
+record_installed_file() {
+    local rel_path="$1"
+    local abs_path="$2"
+
+    # Compute MD5 of the installed file
+    local checksum
+    checksum=$(compute_md5 "$abs_path")
+
+    # Create JSON entry
+    local entry="{\"path\": \"$rel_path\", \"md5\": \"$checksum\"}"
+
+    # Read current state file
+    local temp_file
+    temp_file=$(mktemp)
+    TEMP_FILES+=("$temp_file")
+
+    # Use awk to insert the new entry before the closing ] of files array
+    awk -v entry="$entry" '
+        BEGIN { found_files = 0; empty_array = 0 }
+        /\"files\": *\[\]/ {
+            # Empty array case - replace with array containing entry
+            gsub(/\[\]/, "[" entry "]")
+            print
+            next
+        }
+        /\"files\": *\[/ { found_files = 1 }
+        found_files && /\]/ {
+            # Found closing bracket of files array
+            # Check if we need a comma (array not empty)
+            if (prev_line !~ /\[[ \t]*$/) {
+                gsub(/\]/, ", " entry "]")
+            } else {
+                gsub(/\]/, entry "]")
+            }
+            found_files = 0
+        }
+        { prev_line = $0; print }
+    ' "$MINERVIA_STATE_FILE" > "$temp_file"
+
+    mv "$temp_file" "$MINERVIA_STATE_FILE"
+}
+
 # Platform-specific command wrappers
 # These handle differences between BSD (macOS) and GNU (Linux) tools
 
