@@ -311,6 +311,114 @@ run_questionnaire() {
     fi
 }
 
+# Display summary of all answers
+show_summary() {
+    echo ""
+    if $HAS_GUM; then
+        gum style --border double --padding "1 2" --border-foreground 99 "Summary"
+    else
+        echo "========================================"
+        echo "             Summary"
+        echo "========================================"
+    fi
+    echo ""
+    echo "1) Name:        ${ANSWERS[name]}"
+    echo "2) Vault path:  ${ANSWERS[vault_path]}"
+    echo "3) Role:        ${ANSWERS[role]}"
+    echo "4) Key areas:   ${ANSWERS[areas]:-None selected}"
+    echo "5) Preferences: ${ANSWERS[preferences]:-None selected}"
+    echo ""
+}
+
+# Edit a specific answer field
+edit_answer() {
+    local field="$1"
+    case "$field" in
+        1|name)
+            echo "What should Claude call you?"
+            ANSWERS[name]=$(ask_text "Your name:" "${ANSWERS[name]}" true)
+            ;;
+        2|vault_path|vault-path)
+            echo "Where is your Obsidian vault?"
+            while true; do
+                ANSWERS[vault_path]=$(ask_text "Vault path:" "${ANSWERS[vault_path]}" true)
+                if [[ -d "${ANSWERS[vault_path]}" ]]; then
+                    break
+                else
+                    if ask_confirm "Directory doesn't exist. Create it?" "n"; then
+                        if mkdir -p "${ANSWERS[vault_path]}" 2>/dev/null; then
+                            echo -e "${GREEN}✓${NC} Created ${ANSWERS[vault_path]}"
+                            break
+                        else
+                            echo -e "${RED}Failed to create directory.${NC} Check permissions."
+                        fi
+                    fi
+                fi
+            done
+            ;;
+        3|role)
+            echo "What best describes your role?"
+            ANSWERS[role]=$(ask_choice "Select your role:" "${ROLE_OPTIONS[@]}")
+            if [[ "${ANSWERS[role]}" == "Other" ]]; then
+                ANSWERS[role]=$(ask_text "Describe your role:" "e.g., Freelance editor" true)
+            fi
+            ;;
+        4|areas)
+            echo "What areas do you focus on?"
+            local areas_raw
+            areas_raw=$(ask_multi "Select your key areas:" "${AREA_OPTIONS[@]}")
+            ANSWERS[areas]=$(echo "$areas_raw" | tr '\n' ',' | sed 's/,$//')
+            ;;
+        5|preferences)
+            echo "How do you prefer Claude to communicate?"
+            local prefs_raw
+            prefs_raw=$(ask_multi "Select preferences:" "${PREF_OPTIONS[@]}")
+            ANSWERS[preferences]=$(echo "$prefs_raw" | tr '\n' ',' | sed 's/,$//')
+            ;;
+    esac
+}
+
+# Confirm summary with edit/restart options
+confirm_summary() {
+    while true; do
+        show_summary
+
+        local action
+        if $HAS_GUM; then
+            action=$(gum choose "Continue" "Edit answer" "Start over")
+        else
+            echo "c) Continue"
+            echo "e) Edit an answer"
+            echo "r) Start over"
+            read -p "Choice: " action
+            case "$action" in
+                c|C) action="Continue" ;;
+                e|E) action="Edit answer" ;;
+                r|R) action="Start over" ;;
+            esac
+        fi
+
+        case "$action" in
+            "Continue")
+                return 0
+                ;;
+            "Edit answer")
+                local field
+                if $HAS_GUM; then
+                    field=$(gum choose "1) Name" "2) Vault path" "3) Role" "4) Key areas" "5) Preferences")
+                    field="${field%%)*}"  # Extract number
+                else
+                    read -p "Which field to edit (1-5)? " field
+                fi
+                edit_answer "$field"
+                ;;
+            "Start over")
+                return 1  # Signal to restart questionnaire
+                ;;
+        esac
+    done
+}
+
 # Display help message
 show_help() {
     cat << 'EOF'
