@@ -643,6 +643,28 @@ detect_vault_type() {
     export IS_NEW_VAULT
 }
 
+# Create PARA folder structure for new vaults
+# Folders: 00 Daily/YYYY, 01 Inbox, 02 Projects, 03 Areas, 04 Resources, 04 Resources/Templates, 05 Archive
+create_para_folders() {
+    local folders=(
+        "00 Daily/$(date +%Y)"
+        "01 Inbox"
+        "02 Projects"
+        "03 Areas"
+        "04 Resources"
+        "04 Resources/Templates"
+        "05 Archive"
+    )
+
+    for folder in "${folders[@]}"; do
+        if mkdir -p "$folder" 2>/dev/null; then
+            echo -e "${GREEN}+${NC} $folder"
+        else
+            echo -e "${RED}!${NC} Failed to create: $folder" >&2
+        fi
+    done
+}
+
 # Escape special sed characters in user input
 # Prevents sed injection from user-provided values
 escape_for_sed() {
