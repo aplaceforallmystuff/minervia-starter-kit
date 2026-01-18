@@ -507,6 +507,52 @@ show_status() {
     esac
 }
 
+# Display final installation summary
+show_final_summary() {
+    echo ""
+    echo "======================================="
+    echo "Installation Summary"
+    echo "======================================="
+    echo ""
+
+    if $HAS_GUM; then
+        gum style --border normal --padding "0 2" \
+            "Steps completed: $STEPS_INSTALLED" \
+            "Steps skipped:   $STEPS_SKIPPED" \
+            "Steps failed:    $STEPS_FAILED"
+    else
+        echo -e "  ${GREEN}Completed:${NC} $STEPS_INSTALLED step(s)"
+        echo -e "  ${YELLOW}Skipped:${NC}   $STEPS_SKIPPED step(s)"
+        if [[ $STEPS_FAILED -gt 0 ]]; then
+            echo -e "  ${RED}Failed:${NC}    $STEPS_FAILED step(s)"
+        fi
+    fi
+
+    echo ""
+
+    # Show what was installed
+    if [[ $STEPS_INSTALLED -gt 0 ]] || [[ $STEPS_SKIPPED -gt 0 ]]; then
+        echo "Skills installed to: $SKILLS_TARGET"
+        echo "Agents installed to: $AGENTS_TARGET"
+        echo ""
+    fi
+
+    # Show next steps only on first run
+    if [[ "$FIRST_RUN" == "true" ]]; then
+        echo "Next steps:"
+        echo ""
+        echo "1. Edit CLAUDE.md to match your vault structure"
+        echo "2. Start Claude Code: claude"
+        echo "3. Try: /log-to-daily after your first session"
+        echo ""
+        echo -e "${GREEN}Tip:${NC} Your first Claude session will show a welcome guide!"
+        echo ""
+    fi
+
+    echo "Learn more at: https://github.com/aplaceforallmystuff/minervia-starter-kit"
+    echo ""
+}
+
 # CLI flag storage (used before ANSWERS array is available)
 # These get copied to ANSWERS after check_prerequisites runs
 CLI_NAME=""
@@ -1799,6 +1845,11 @@ echo ""
 echo "Installing Minervia..."
 echo ""
 
+# Installation counters
+STEPS_INSTALLED=0
+STEPS_SKIPPED=0
+STEPS_FAILED=0
+
 # Use vault path from questionnaire, or fall back to current directory
 VAULT_DIR="${ANSWERS[vault_path]:-$(pwd)}"
 SKILLS_SOURCE="$(dirname "$0")/skills"
@@ -1899,23 +1950,4 @@ SETTINGS
     echo -e "${GREEN}✓${NC} First-run welcome configured"
 fi
 
-echo ""
-echo "======================================="
-echo -e "${GREEN}Setup Complete!${NC}"
-echo "======================================="
-echo ""
-echo "Next steps:"
-echo ""
-echo "1. Edit CLAUDE.md to match your vault structure"
-echo "2. Start Claude Code: claude"
-echo "3. Try: /log-to-daily after your first session"
-echo ""
-echo "Skills installed to: $SKILLS_TARGET"
-echo "Agents installed to: $AGENTS_TARGET"
-echo ""
-if [ "$FIRST_RUN" = true ]; then
-    echo -e "${GREEN}Tip:${NC} Your first Claude session will show a welcome guide!"
-    echo ""
-fi
-echo "Learn more at: https://github.com/aplaceforallmystuff/minervia-starter-kit"
-echo ""
+show_final_summary
