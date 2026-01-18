@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-18)
 
 **Core value:** After running installer, Claude understands your vault and you're immediately productive
-**Current focus:** Phase 6 - Skills Installation
+**Current focus:** Phase 6 complete - Ready for Phase 7 Polish
 
 ## Current Position
 
 Phase: 6 of 8 (Skills Installation)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-01-18 - Completed 06-01-PLAN.md
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-01-18 - Completed 06-02-PLAN.md
 
-Progress: [████████░░] 71%
+Progress: [████████░░] 79%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
-- Average duration: 2.7 min
-- Total execution time: 27 min
+- Total plans completed: 11
+- Average duration: 2.6 min
+- Total execution time: 29 min
 
 **By Phase:**
 
@@ -32,10 +32,10 @@ Progress: [████████░░] 71%
 | 03-questionnaire-engine | 2 | 6 min | 3 min |
 | 04-claudemd-generation | 2 | 6 min | 3 min |
 | 05-vault-scaffolding | 2 | 5 min | 2.5 min |
-| 06-skills-installation | 1 | 3 min | 3 min |
+| 06-skills-installation | 2 | 5 min | 2.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-01 (3 min), 04-02 (3 min), 05-01 (3 min), 05-02 (2 min), 06-01 (3 min)
+- Last 5 plans: 04-02 (3 min), 05-01 (3 min), 05-02 (2 min), 06-01 (3 min), 06-02 (2 min)
 - Trend: Consistent 2-3 min per plan
 
 *Updated after each plan completion*
@@ -83,6 +83,10 @@ Recent decisions affecting current work:
 - [06-01]: Cross-platform MD5 using platform detection (md5 -q on macOS, md5sum on Linux)
 - [06-01]: JSON manipulation via awk instead of jq (no additional dependency)
 - [06-01]: state.json stores version, installed_at timestamp, and files array with checksums
+- [06-02]: install_single_file returns 0/1/2 for installed/skipped/failed
+- [06-02]: Conflict handling reuses existing ask_choice and show_colored_diff
+- [06-02]: init_state_file called before any installation operations
+- [06-02]: Agents install to ~/.claude/agents/ following same pattern as skills
 
 ### Pending Todos
 
@@ -95,5 +99,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 06-01-PLAN.md
+Stopped at: Completed 06-02-PLAN.md (Phase 6 complete)
 Resume file: None
