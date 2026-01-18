@@ -597,6 +597,14 @@ export PLATFORM
 
 MINERVIA_STATE_DIR="$HOME/.minervia"
 MINERVIA_STATE_FILE="$MINERVIA_STATE_DIR/state.json"
+LOCK_FILE="$MINERVIA_STATE_DIR/.lock"
+
+# Step IDs for completion tracking
+STEP_QUESTIONNAIRE="questionnaire"
+STEP_CLAUDEMD="claudemd"
+STEP_SCAFFOLD="scaffold"
+STEP_SKILLS="skills"
+STEP_AGENTS="agents"
 
 # Cross-platform MD5 computation
 # Args: file_path
@@ -626,7 +634,8 @@ init_state_file() {
 {
   "version": "$VERSION",
   "installed_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-  "files": []
+  "files": [],
+  "completed_steps": []
 }
 EOF
     else
@@ -688,6 +697,77 @@ record_installed_file() {
     ' "$MINERVIA_STATE_FILE" > "$temp_file"
 
     mv "$temp_file" "$MINERVIA_STATE_FILE"
+}
+
+# Check if a step is already completed
+# Args: step_id
+# Returns: 0 if complete, 1 if not
+is_step_complete() {
+    local step_id="$1"
+
+    # Check state file exists
+    [[ ! -f "$MINERVIA_STATE_FILE" ]] && return 1
+
+    # Check for step in completed_steps array
+    grep -q "\"step\": \"$step_id\"" "$MINERVIA_STATE_FILE" 2>/dev/null
+}
+
+# Mark a step as complete in state.json
+# Args: step_id
+mark_step_complete() {
+    local step_id="$1"
+    local timestamp
+    timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    local entry="{\"step\": \"$step_id\", \"completed_at\": \"$timestamp\"}"
+
+    local temp_file
+    temp_file=$(mktemp)
+    TEMP_FILES+=("$temp_file")
+
+    # Add entry to completed_steps array (similar to record_installed_file)
+    awk -v entry="$entry" '
+        /\"completed_steps\": *\[\]/ {
+            gsub(/\[\]/, "[" entry "]")
+            print
+            next
+        }
+        /\"completed_steps\": *\[/ { found = 1 }
+        found && /\]/ {
+            if (prev !~ /\[[ \t]*$/) {
+                gsub(/\]/, ", " entry "]")
+            } else {
+                gsub(/\]/, entry "]")
+            }
+            found = 0
+        }
+        { prev = $0; print }
+    ' "$MINERVIA_STATE_FILE" > "$temp_file"
+
+    mv "$temp_file" "$MINERVIA_STATE_FILE"
+}
+
+# Run a step if not already complete
+# Args: step_id, step_name (display), step_function (to call)
+# Returns: 0 if step completed (now or previously), non-zero on failure
+run_step() {
+    local step_id="$1"
+    local step_name="$2"
+    local step_function="$3"
+
+    if is_step_complete "$step_id"; then
+        echo -e "${GREEN}^${NC} $step_name (already completed)"
+        return 0
+    fi
+
+    # Run the step
+    "$step_function"
+    local result=$?
+
+    if [[ $result -eq 0 ]]; then
+        mark_step_complete "$step_id"
+    fi
+
+    return $result
 }
 
 # ============================================================================
