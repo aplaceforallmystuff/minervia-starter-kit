@@ -139,10 +139,12 @@ Plans:
   4. User can choose merge strategy for customized files (keep mine, take theirs, backup + overwrite)
   5. Backup is created before any files are modified
   6. Update reports what changed after completion
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 08-01: TBD
+- [ ] 08-01-PLAN.md — Update script core: git fetch, version comparison, backup creation, dry-run
+- [ ] 08-02-PLAN.md — Conflict handling: customization detection, merge strategies, changelog, restore
+- [ ] 08-03-PLAN.md — Skills and integration: /minervia:update, /minervia:restore, install.sh wiring
 
 ## Progress
 
@@ -153,12 +155,12 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 |-------|----------------|--------|-----------|
 | 1. Foundation | 1/1 | Complete | 2026-01-18 |
 | 2. CLI Interface | 2/2 | Complete | 2026-01-18 |
-| 3. Questionnaire Engine | 2/2 | Complete | 2026-01-18 |
+| 3. CLI Interface | 2/2 | Complete | 2026-01-18 |
 | 4. CLAUDE.md Generation | 2/2 | Complete | 2026-01-18 |
 | 5. Vault Scaffolding | 2/2 | Complete | 2026-01-18 |
 | 6. Skills Installation | 2/2 | Complete | 2026-01-18 |
 | 7. Idempotency and Safety | 2/2 | Complete | 2026-01-18 |
-| 8. Update System | 0/? | Not started | - |
+| 8. Update System | 0/3 | Planning complete | - |
 
 ---
 *Roadmap created: 2026-01-18*
