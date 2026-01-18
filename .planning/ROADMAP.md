@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: CLI Interface** - Help, version, prerequisites checking
 - [x] **Phase 3: Questionnaire Engine** - Interactive prompts for user context
 - [x] **Phase 4: CLAUDE.md Generation** - Template system and personalization
-- [ ] **Phase 5: Vault Scaffolding** - PARA structure, templates, examples
+- [x] **Phase 5: Vault Scaffolding** - PARA structure, templates, examples
 - [ ] **Phase 6: Skills Installation** - Copy skills/agents with version tracking
 - [ ] **Phase 7: Idempotency and Safety** - Safe re-runs, confirmations, progress
 - [ ] **Phase 8: Update System** - Self-update with customization preservation
@@ -95,8 +95,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — PARA folder creation and Obsidian template files
-- [ ] 05-02-PLAN.md — Example notes and scaffold_new_vault integration
+- [x] 05-01-PLAN.md — PARA folder creation and Obsidian template files
+- [x] 05-02-PLAN.md — Example notes and scaffold_new_vault integration
 
 ### Phase 6: Skills Installation
 **Goal**: Skills and agents are installed globally with version tracking
@@ -153,7 +153,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 2. CLI Interface | 2/2 | Complete | 2026-01-18 |
 | 3. Questionnaire Engine | 2/2 | Complete | 2026-01-18 |
 | 4. CLAUDE.md Generation | 2/2 | Complete | 2026-01-18 |
-| 5. Vault Scaffolding | 0/2 | Not started | - |
+| 5. Vault Scaffolding | 2/2 | Complete | 2026-01-18 |
 | 6. Skills Installation | 0/? | Not started | - |
 | 7. Idempotency and Safety | 0/? | Not started | - |
 | 8. Update System | 0/? | Not started | - |

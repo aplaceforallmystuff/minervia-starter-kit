@@ -110,10 +110,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ONBD-03 | Phase 4 | Complete |
 | ONBD-04 | Phase 4 | Complete |
 | ONBD-05 | Phase 4 | Complete |
-| VAULT-01 | Phase 5 | Pending |
-| VAULT-02 | Phase 5 | Pending |
-| VAULT-03 | Phase 5 | Pending |
-| VAULT-04 | Phase 5 | Pending |
+| VAULT-01 | Phase 5 | Complete |
+| VAULT-02 | Phase 5 | Complete |
+| VAULT-03 | Phase 5 | Complete |
+| VAULT-04 | Phase 5 | Complete |
 | SKIL-01 | Phase 6 | Pending |
 | SKIL-02 | Phase 6 | Pending |
 | SKIL-03 | Phase 6 | Pending |
