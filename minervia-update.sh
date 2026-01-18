@@ -25,6 +25,11 @@ TEMP_DIR=""
 DRY_RUN=false
 VERBOSE=false
 
+# Arrays for tracking file status
+declare -a CUSTOMIZED_FILES=()
+declare -a PRISTINE_FILES=()
+declare -a NEW_FILES=()
+
 # ============================================================================
 # Cleanup
 # ============================================================================
@@ -251,60 +256,415 @@ create_backup() {
     echo "$backup_path"
 }
 
-# List available backups
+# List available backups with file counts
 list_backups() {
     if [[ ! -d "$BACKUP_DIR" ]] || [[ -z "$(ls -A "$BACKUP_DIR" 2>/dev/null)" ]]; then
         echo "No backups found"
+        echo ""
+        echo "Backups are created automatically before updates."
+        echo "Location: $BACKUP_DIR"
         return 0
     fi
 
     echo "Available backups:"
+    echo ""
+
     for dir in "$BACKUP_DIR"/*/; do
         [[ ! -d "$dir" ]] && continue
+
         local timestamp
         timestamp=$(basename "$dir")
+
         local count
         count=$(find "$dir" -type f 2>/dev/null | wc -l | tr -d ' ')
+
         echo "  $timestamp ($count files)"
+    done
+
+    echo ""
+    echo "To restore: ./minervia-update.sh --restore TIMESTAMP"
+}
+
+# Restore files from a specific backup
+# Args: backup_timestamp
+restore_backup() {
+    local backup_timestamp="$1"
+    local backup_path="$BACKUP_DIR/$backup_timestamp"
+
+    if [[ ! -d "$backup_path" ]]; then
+        echo -e "${RED}Backup not found: $backup_timestamp${NC}"
+        echo ""
+        echo "Available backups:"
+        list_backups
+        return 1
+    fi
+
+    echo "Restore from backup: $backup_timestamp"
+    echo ""
+
+    # Count files to restore
+    local file_count
+    file_count=$(find "$backup_path" -type f | wc -l | tr -d ' ')
+    echo "Files to restore: $file_count"
+    echo ""
+
+    # Preview files
+    echo "Files:"
+    find "$backup_path" -type f | while read -r file; do
+        local rel_path="${file#$backup_path/}"
+        echo "  - $rel_path"
+    done
+
+    echo ""
+    read -p "Restore these files? (y/N) " confirm
+    if [[ ! "$confirm" =~ ^[Yy] ]]; then
+        echo "Restore cancelled"
+        return 0
+    fi
+
+    echo ""
+    echo "Restoring..."
+
+    local restored=0
+    local failed=0
+
+    # Restore each file
+    while IFS= read -r file; do
+        local rel_path="${file#$backup_path/}"
+        local target
+        target=$(resolve_path "$rel_path")
+
+        mkdir -p "$(dirname "$target")"
+
+        if cp "$file" "$target" 2>/dev/null; then
+            echo -e "${GREEN}+${NC} Restored: $rel_path"
+            ((restored++))
+        else
+            echo -e "${RED}!${NC} Failed: $rel_path"
+            ((failed++))
+        fi
+    done < <(find "$backup_path" -type f)
+
+    echo ""
+    echo -e "${GREEN}Restore complete${NC}"
+    echo "Restored: $restored files"
+    if [[ $failed -gt 0 ]]; then
+        echo -e "${RED}Failed: $failed files${NC}"
+    fi
+}
+
+# ============================================================================
+# Customization Detection Functions
+# ============================================================================
+
+# Display colored unified diff (macOS compatible)
+show_colored_diff() {
+    local existing="$1"
+    local proposed="$2"
+
+    diff -u "$existing" "$proposed" 2>/dev/null | while IFS= read -r line; do
+        case "$line" in
+            ---*) echo -e "${RED}$line${NC}" ;;
+            +++*) echo -e "${GREEN}$line${NC}" ;;
+            @@*)  echo -e "${YELLOW}$line${NC}" ;;
+            -*)   echo -e "${RED}$line${NC}" ;;
+            +*)   echo -e "${GREEN}$line${NC}" ;;
+            *)    echo "$line" ;;
+        esac
     done
 }
 
-# Restore from a specific backup (stub for Plan 02)
-restore_backup() {
-    local backup_timestamp="$1"
-    echo "Restore not implemented yet"
-    echo "Will restore from: $BACKUP_DIR/$backup_timestamp"
-    return 1
+# Single selection from options (Gum with fallback)
+ask_choice() {
+    local prompt="$1"
+    shift
+    local options=("$@")
+
+    if command -v gum &>/dev/null; then
+        gum choose --header "$prompt" "${options[@]}"
+    else
+        echo "$prompt"
+        local i=1
+        for opt in "${options[@]}"; do
+            echo "  $i) $opt"
+            ((i++))
+        done
+
+        while true; do
+            read -p "Enter number (1-${#options[@]}): " choice
+            if [[ "$choice" =~ ^[0-9]+$ ]] && [[ $choice -ge 1 ]] && [[ $choice -le ${#options[@]} ]]; then
+                echo "${options[$((choice-1))]}"
+                return 0
+            fi
+            echo "Invalid selection."
+        done
+    fi
 }
 
-# ============================================================================
-# Stub Functions (to be implemented in Plan 02)
-# ============================================================================
+# Check if installed file differs from manifest checksum
+# Args: relative_path, absolute_path
+# Returns: 0 if customized (differs), 1 if pristine (matches) or missing
+is_file_customized() {
+    local rel_path="$1"
+    local abs_path="$2"
 
+    [[ ! -f "$abs_path" ]] && return 1
+
+    local current_md5
+    current_md5=$(compute_md5 "$abs_path")
+
+    # Get stored MD5 from state.json
+    local stored_md5
+    stored_md5=$(grep -A1 "\"path\": \"$rel_path\"" "$MINERVIA_STATE_FILE" 2>/dev/null | \
+                 grep '"md5"' | cut -d'"' -f4)
+
+    [[ -z "$stored_md5" ]] && return 1  # Not in manifest = not customized
+
+    [[ "$current_md5" != "$stored_md5" ]]
+}
+
+# Scan all installed files for customizations
+# Populates CUSTOMIZED_FILES, PRISTINE_FILES, NEW_FILES arrays
 scan_for_customizations() {
-    verbose "Scanning for customized files..."
-    echo "TODO: Scan for customizations"
-    return 0
+    CUSTOMIZED_FILES=()
+    PRISTINE_FILES=()
+    NEW_FILES=()
+
+    # Scan files in state.json manifest
+    while IFS= read -r rel_path; do
+        [[ -z "$rel_path" ]] && continue
+
+        local abs_path
+        abs_path=$(resolve_path "$rel_path")
+
+        if is_file_customized "$rel_path" "$abs_path"; then
+            CUSTOMIZED_FILES+=("$rel_path")
+            verbose "  Customized: $rel_path"
+        else
+            PRISTINE_FILES+=("$rel_path")
+            verbose "  Pristine: $rel_path"
+        fi
+    done < <(grep -o '"path": "[^"]*"' "$MINERVIA_STATE_FILE" | cut -d'"' -f4)
+
+    # Check for new files in remote that aren't in manifest
+    if [[ -d "$TEMP_DIR/skills" ]]; then
+        for skill_dir in "$TEMP_DIR/skills"/*/; do
+            [[ ! -d "$skill_dir" ]] && continue
+            local skill_name
+            skill_name=$(basename "$skill_dir")
+            for file in "$skill_dir"*; do
+                [[ ! -f "$file" ]] && continue
+                local filename rel_path="skills/$skill_name/$(basename "$file")"
+                if ! grep -q "\"path\": \"$rel_path\"" "$MINERVIA_STATE_FILE" 2>/dev/null; then
+                    NEW_FILES+=("$rel_path")
+                    verbose "  New: $rel_path"
+                fi
+            done
+        done
+    fi
+
+    echo "  Customized: ${#CUSTOMIZED_FILES[@]} files"
+    echo "  Unchanged:  ${#PRISTINE_FILES[@]} files"
+    echo "  New:        ${#NEW_FILES[@]} files"
 }
 
+# Handle a single customized file conflict
+# Args: relative_path
+# Returns: 0 if updated, 1 if kept existing
+handle_customized_file() {
+    local rel_path="$1"
+    local current_file new_file
+
+    current_file=$(resolve_path "$rel_path")
+    new_file="$TEMP_DIR/$rel_path"
+
+    [[ ! -f "$new_file" ]] && return 1  # No new version
+
+    echo ""
+    echo "========================================"
+    echo -e "${YELLOW}Conflict: $rel_path${NC}"
+    echo "========================================"
+    echo ""
+
+    show_colored_diff "$current_file" "$new_file"
+
+    echo ""
+
+    local action
+    action=$(ask_choice "How to resolve?" \
+        "Keep mine (skip update)" \
+        "Take theirs (overwrite)" \
+        "Backup + overwrite")
+
+    case "$action" in
+        "Keep mine"*)
+            echo -e "${YELLOW}Keeping your version${NC}"
+            return 1
+            ;;
+        "Take theirs"*)
+            cp "$new_file" "$current_file"
+            echo -e "${GREEN}Updated to new version${NC}"
+            return 0
+            ;;
+        "Backup + overwrite"*)
+            local backup="${current_file}.backup-$(date +%Y%m%d-%H%M%S)"
+            cp "$current_file" "$backup"
+            echo "Backed up to: $backup"
+            cp "$new_file" "$current_file"
+            echo -e "${GREEN}Updated to new version${NC}"
+            return 0
+            ;;
+    esac
+}
+
+# Handle all customized files with merge strategies
 handle_customized_files() {
-    verbose "Handling customized files..."
-    echo "TODO: Handle customized files"
-    return 0
+    if [[ ${#CUSTOMIZED_FILES[@]} -eq 0 ]]; then
+        echo "No customized files to handle"
+        return 0
+    fi
+
+    # Preview all conflicts first (per CONTEXT.md)
+    echo ""
+    echo "Conflicts detected:"
+    for file in "${CUSTOMIZED_FILES[@]}"; do
+        echo "  - $file"
+    done
+    echo ""
+
+    read -p "Press Enter to resolve each conflict..."
+
+    local updated=0
+    local kept=0
+
+    for file in "${CUSTOMIZED_FILES[@]}"; do
+        if handle_customized_file "$file"; then
+            ((updated++))
+        else
+            ((kept++))
+        fi
+    done
+
+    echo ""
+    echo "Conflicts resolved: $updated updated, $kept kept"
 }
 
-apply_updates() {
-    verbose "Applying updates..."
-    echo "TODO: Apply updates"
-    return 0
-}
+# ============================================================================
+# Update Application Functions
+# ============================================================================
 
+# Extract and show changelog highlights between versions
+# Args: from_version, to_version
 show_changelog_highlights() {
     local from_version="$1"
     local to_version="$2"
-    verbose "Showing changelog from $from_version to $to_version"
-    echo "TODO: Show changelog highlights"
-    return 0
+    local changelog_file="$TEMP_DIR/CHANGELOG.md"
+
+    if [[ ! -f "$changelog_file" ]]; then
+        verbose "No CHANGELOG.md found"
+        return 0
+    fi
+
+    echo "What's new in v$to_version:"
+    echo ""
+
+    # Extract relevant section using awk
+    # Look for entries between to_version and from_version
+    awk -v from="$from_version" -v to="$to_version" '
+        BEGIN { printing = 0; found = 0 }
+        /^## \[/ {
+            # Extract version from header like "## [1.2.0]"
+            gsub(/^## \[|\].*$/, "")
+            current = $0
+            if (current == to) { printing = 1; found = 1; next }
+            if (current == from) { printing = 0 }
+        }
+        printing && /^### / { print $0 }
+        printing && /^- / { print "  " $0 }
+    ' "$changelog_file" | head -15
+
+    echo ""
+}
+
+# Apply updates to pristine files and new files
+apply_updates() {
+    local updated=0
+    local installed=0
+    local failed=0
+
+    echo ""
+    echo "Applying updates..."
+
+    # Update pristine files (no conflict)
+    for rel_path in "${PRISTINE_FILES[@]}"; do
+        local current_file new_file
+        current_file=$(resolve_path "$rel_path")
+        new_file="$TEMP_DIR/$rel_path"
+
+        [[ ! -f "$new_file" ]] && continue
+
+        # Check if file actually changed in remote
+        local current_md5 new_md5
+        current_md5=$(compute_md5 "$current_file" 2>/dev/null || echo "")
+        new_md5=$(compute_md5 "$new_file")
+
+        if [[ "$current_md5" == "$new_md5" ]]; then
+            verbose "  Unchanged: $rel_path"
+            continue
+        fi
+
+        # Create directory if needed
+        mkdir -p "$(dirname "$current_file")"
+
+        if cp "$new_file" "$current_file" 2>/dev/null; then
+            echo -e "${GREEN}+${NC} Updated: $rel_path"
+            ((updated++))
+        else
+            echo -e "${RED}!${NC} Failed: $rel_path"
+            ((failed++))
+        fi
+    done
+
+    # Install new files
+    for rel_path in "${NEW_FILES[@]}"; do
+        local target_file new_file
+        target_file=$(resolve_path "$rel_path")
+        new_file="$TEMP_DIR/$rel_path"
+
+        [[ ! -f "$new_file" ]] && continue
+
+        mkdir -p "$(dirname "$target_file")"
+
+        if cp "$new_file" "$target_file" 2>/dev/null; then
+            echo -e "${GREEN}+${NC} Installed: $rel_path"
+            ((installed++))
+        else
+            echo -e "${RED}!${NC} Failed: $rel_path"
+            ((failed++))
+        fi
+    done
+
+    echo ""
+    echo "Updated: $updated files"
+    echo "Installed: $installed new files"
+    if [[ $failed -gt 0 ]]; then
+        echo -e "${RED}Failed: $failed files${NC}"
+    fi
+}
+
+# Update version in state.json after successful update
+update_state_version() {
+    local new_version="$1"
+    local temp_file
+    temp_file=$(mktemp)
+
+    awk -v ver="$new_version" '
+        /"version":/ { gsub(/"version": *"[^"]*"/, "\"version\": \"" ver "\"") }
+        { print }
+    ' "$MINERVIA_STATE_FILE" > "$temp_file"
+
+    mv "$temp_file" "$MINERVIA_STATE_FILE"
+    verbose "Updated state.json version to $new_version"
 }
 
 # ============================================================================
@@ -326,7 +686,9 @@ while [[ $# -gt 0 ]]; do
             ;;
         --restore)
             if [[ -z "${2:-}" ]]; then
-                error_exit "Missing timestamp for --restore" "Usage: --restore TIMESTAMP"
+                echo "Usage: --restore TIMESTAMP"
+                list_backups
+                exit 1
             fi
             restore_backup "$2"
             exit $?
@@ -390,7 +752,7 @@ main() {
     echo -e "${GREEN}Update available: v$installed_version -> v$remote_version${NC}"
     echo ""
 
-    # Show changelog highlights (stub)
+    # Show changelog highlights
     show_changelog_highlights "$installed_version" "$remote_version"
 
     # Dry run stops here
@@ -414,14 +776,14 @@ main() {
     local backup_path
     backup_path=$(create_backup)
 
-    # Handle customized files (prompt for each - stub)
+    # Handle customized files (prompt for each)
     handle_customized_files
 
-    # Apply updates (stub)
+    # Apply updates
     apply_updates
 
     # Update version in state.json
-    # (Will be implemented in Plan 02)
+    update_state_version "$remote_version"
 
     echo ""
     echo -e "${GREEN}Update complete${NC}"
