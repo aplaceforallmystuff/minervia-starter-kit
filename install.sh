@@ -1,14 +1,49 @@
 #!/bin/bash
+set -euo pipefail
 
-echo "🦉 Minervia Setup"
-echo "================"
-echo ""
+# ============================================================================
+# Minervia Installer
+# ============================================================================
+# Human-led knowledge work with AI assistance
+# https://github.com/aplaceforallmystuff/minervia-starter-kit
+# ============================================================================
 
 # Colors for output
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
+
+# Track temporary files for cleanup
+TEMP_FILES=()
+
+# Cleanup function - runs on exit (success or failure)
+cleanup() {
+    local exit_code=$?
+    # Remove any temporary files created during installation
+    for temp_file in "${TEMP_FILES[@]:-}"; do
+        if [[ -f "$temp_file" ]]; then
+            rm -f "$temp_file"
+        fi
+    done
+    exit $exit_code
+}
+trap cleanup EXIT
+
+# Error exit with actionable recovery message
+error_exit() {
+    local message="$1"
+    local recovery="${2:-}"
+    echo -e "${RED}ERROR:${NC} $message" >&2
+    if [[ -n "$recovery" ]]; then
+        echo -e "  ${YELLOW}Try:${NC} $recovery" >&2
+    fi
+    exit 1
+}
+
+echo "🦉 Minervia Setup"
+echo "================"
+echo ""
 
 # Check for required tools
 check_command() {
