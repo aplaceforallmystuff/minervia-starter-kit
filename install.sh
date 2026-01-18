@@ -665,6 +665,101 @@ create_para_folders() {
     done
 }
 
+# Create starter templates for new vaults
+# Templates use Obsidian core template syntax ({{date:...}}, {{title}})
+create_templates() {
+    local template_dir="04 Resources/Templates"
+
+    # Daily Note template
+    cat > "$template_dir/Daily Note.md" << 'TEMPLATE'
+---
+created: {{date:YYYY-MM-DD}}
+tags: [daily]
+---
+
+# {{date:dddd, MMMM D, YYYY}}
+
+## Focus
+
+What's the main thing to accomplish today?
+
+-
+
+## Notes
+
+## Reflection
+
+**What went well:**
+
+**What to improve:**
+TEMPLATE
+    echo -e "${GREEN}+${NC} Daily Note.md template"
+
+    # Project template
+    cat > "$template_dir/Project.md" << 'TEMPLATE'
+---
+created: {{date:YYYY-MM-DD}}
+status: active
+tags: [project]
+due:
+---
+
+# {{title}}
+
+## Overview
+
+What is this project and why does it matter?
+
+## Success Criteria
+
+How will you know when this project is complete?
+
+- [ ]
+
+## Next Actions
+
+- [ ]
+
+## Notes
+
+## Related
+
+-
+TEMPLATE
+    echo -e "${GREEN}+${NC} Project.md template"
+
+    # Area template
+    cat > "$template_dir/Area.md" << 'TEMPLATE'
+---
+created: {{date:YYYY-MM-DD}}
+tags: [area]
+---
+
+# {{title}}
+
+## Purpose
+
+Why is this area important? What responsibility does it represent?
+
+## Standards
+
+What does success look like in this area?
+
+-
+
+## Current Focus
+
+What aspects need attention right now?
+
+## Resources
+
+Related projects, notes, and references.
+
+-
+TEMPLATE
+    echo -e "${GREEN}+${NC} Area.md template"
+}
+
 # Escape special sed characters in user input
 # Prevents sed injection from user-provided values
 escape_for_sed() {
