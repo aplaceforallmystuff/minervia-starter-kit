@@ -760,6 +760,120 @@ TEMPLATE
     echo -e "${GREEN}+${NC} Area.md template"
 }
 
+# Create example notes in each PARA folder to explain purpose
+# These are clearly marked as deletable examples
+create_example_notes() {
+    # Inbox example
+    cat > "01 Inbox/Welcome to your Inbox.md" << 'EXAMPLE'
+# Welcome to your Inbox
+
+This folder is for quick capture - ideas, links, notes that haven't been organized yet.
+
+**How to use:**
+1. Capture anything here without worrying about organization
+2. During your weekly review, process items:
+   - Move to appropriate PARA folder
+   - Delete if no longer relevant
+   - Add to a project or area
+
+**Tip:** Keep the inbox small. If it grows too large, it becomes overwhelming.
+EXAMPLE
+    echo -e "${GREEN}+${NC} Inbox example note"
+
+    # Projects example
+    cat > "02 Projects/Example Project.md" << 'EXAMPLE'
+---
+created: 2025-01-01
+status: example
+tags: [project, example]
+due: 2025-03-01
+---
+
+# Example Project
+
+> Delete this file once you understand the structure.
+
+## Overview
+
+Projects have a **deadline** and a clear **definition of done**. When complete, move them to Archive.
+
+## Success Criteria
+
+- [ ] Criterion 1
+- [ ] Criterion 2
+- [ ] All criteria met = project complete
+
+## Next Actions
+
+- [ ] First actionable step
+- [ ] Second step (add as you go)
+
+## Notes
+
+Add meeting notes, research, decisions here.
+
+## Related
+
+- [[Example Area]] - The area this project supports
+EXAMPLE
+    echo -e "${GREEN}+${NC} Projects example note"
+
+    # Areas example
+    cat > "03 Areas/Example Area.md" << 'EXAMPLE'
+---
+created: 2025-01-01
+tags: [area, example]
+---
+
+# Example Area
+
+> Delete this file once you understand the structure.
+
+## Purpose
+
+Areas are **ongoing responsibilities** without end dates. Examples:
+- Health
+- Finances
+- Career
+- Relationships
+- Home
+
+## Standards
+
+What does "good enough" look like for this area?
+
+- Standard 1
+- Standard 2
+
+## Current Focus
+
+What aspects need attention right now?
+
+## Related Projects
+
+- [[Example Project]]
+EXAMPLE
+    echo -e "${GREEN}+${NC} Areas example note"
+
+    # Archive example
+    cat > "05 Archive/About the Archive.md" << 'EXAMPLE'
+# About the Archive
+
+This folder holds **completed projects** and **inactive items**.
+
+**When to archive:**
+- Project is complete (all success criteria met)
+- Area is no longer relevant
+- Reference material is outdated but worth keeping
+
+**Archive structure:**
+Some people organize by year (Archive/2025/), others keep it flat. Do what works for you.
+
+**Remember:** Archived doesn't mean deleted. You can always search or move things back.
+EXAMPLE
+    echo -e "${GREEN}+${NC} Archive example note"
+}
+
 # Escape special sed characters in user input
 # Prevents sed injection from user-provided values
 escape_for_sed() {
