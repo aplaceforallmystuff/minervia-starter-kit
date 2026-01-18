@@ -41,6 +41,60 @@ error_exit() {
     exit 1
 }
 
+# ============================================================================
+# Platform Detection
+# ============================================================================
+
+# Detect operating system and set platform-specific behaviors
+detect_platform() {
+    case "$(uname -s)" in
+        Darwin)
+            PLATFORM="macos"
+            ;;
+        Linux)
+            PLATFORM="linux"
+            ;;
+        *)
+            error_exit "Unsupported platform: $(uname -s)" "Minervia supports macOS and Linux only"
+            ;;
+    esac
+}
+detect_platform
+export PLATFORM
+
+# Platform-specific command wrappers
+# These handle differences between BSD (macOS) and GNU (Linux) tools
+
+# Portable in-place sed edit (BSD vs GNU sed)
+portable_sed_inplace() {
+    if [[ "$PLATFORM" == "macos" ]]; then
+        sed -i '' "$@"
+    else
+        sed -i "$@"
+    fi
+}
+
+# Portable date formatting (BSD vs GNU date)
+# Usage: portable_date "+%Y-%m-%d"
+portable_date() {
+    date "$@"
+}
+
+# Portable stat for file modification time
+# Returns modification time as Unix timestamp
+portable_stat_mtime() {
+    local file="$1"
+    if [[ "$PLATFORM" == "macos" ]]; then
+        stat -f %m "$file"
+    else
+        stat -c %Y "$file"
+    fi
+}
+
+# ============================================================================
+# Main Installation
+# ============================================================================
+
 echo "🦉 Minervia Setup"
 echo "================"
 echo ""
