@@ -425,6 +425,7 @@ show_help() {
 Usage: install.sh [OPTIONS]
 
 Minervia installer - sets up your Obsidian vault for AI-assisted knowledge work.
+Installs skills to ~/.claude/skills/ and agents to ~/.claude/agents/
 
 Options:
   -h, --help      Show this help message and exit
@@ -454,11 +455,13 @@ Prerequisites:
 Uninstall:
   To remove Minervia from your system:
   1. Delete skill directories: rm -rf ~/.claude/skills/minervia-*
-  2. Optionally remove vault files:
+  2. Delete agent directories: rm -rf ~/.claude/agents/pkm-*
+  3. Optionally remove vault files:
      - CLAUDE.md (contains your customizations)
      - .minervia-initialized
      - .minervia-first-run
      - .claude/settings.json (if you want to remove hooks)
+  4. Remove state directory: rm -rf ~/.minervia
 
 More info: https://github.com/aplaceforallmystuff/minervia-starter-kit
 EOF
@@ -778,6 +781,112 @@ install_single_file() {
         return 0
     else
         return 1
+    fi
+}
+
+# Install all skills from source directory
+# Uses install_single_file for each file in each skill directory
+install_skills() {
+    local source_dir="$1"
+    local target_dir="$2"
+
+    local installed=0
+    local skipped=0
+    local failed=0
+
+    # Loop through skill directories
+    for skill_dir in "$source_dir"/*/; do
+        if [[ ! -d "$skill_dir" ]]; then
+            continue
+        fi
+
+        local skill_name
+        skill_name=$(basename "$skill_dir")
+
+        # Loop through files in skill directory
+        for file in "$skill_dir"*; do
+            if [[ ! -f "$file" ]]; then
+                continue
+            fi
+
+            local filename
+            filename=$(basename "$file")
+            local target_path="$target_dir/$skill_name/$filename"
+            local rel_path="skills/$skill_name/$filename"
+            local display_name="$skill_name/$filename"
+
+            local result
+            install_single_file "$file" "$target_path" "$display_name" "$rel_path"
+            result=$?
+
+            case $result in
+                0) ((installed++)) || true ;;
+                1) ((skipped++)) || true ;;
+                2) ((failed++)) || true ;;
+            esac
+        done
+    done
+
+    echo ""
+    echo -e "Skills: ${GREEN}$installed installed${NC}, ${YELLOW}$skipped unchanged${NC}"
+    if [[ $failed -gt 0 ]]; then
+        echo -e "${RED}$failed failed${NC}"
+    fi
+}
+
+# Install all agents from source directory
+# Uses install_single_file for each file in each agent directory
+install_agents() {
+    local source_dir="$1"
+    local target_dir="$2"
+
+    # Gracefully handle missing agents directory
+    if [[ ! -d "$source_dir" ]]; then
+        echo "No agents directory found (skipping)"
+        return 0
+    fi
+
+    local installed=0
+    local skipped=0
+    local failed=0
+
+    # Loop through agent directories
+    for agent_dir in "$source_dir"/*/; do
+        if [[ ! -d "$agent_dir" ]]; then
+            continue
+        fi
+
+        local agent_name
+        agent_name=$(basename "$agent_dir")
+
+        # Loop through files in agent directory
+        for file in "$agent_dir"*; do
+            if [[ ! -f "$file" ]]; then
+                continue
+            fi
+
+            local filename
+            filename=$(basename "$file")
+            local target_path="$target_dir/$agent_name/$filename"
+            local rel_path="agents/$agent_name/$filename"
+            local display_name="$agent_name/$filename"
+
+            local result
+            install_single_file "$file" "$target_path" "$display_name" "$rel_path"
+            result=$?
+
+            case $result in
+                0) ((installed++)) || true ;;
+                1) ((skipped++)) || true ;;
+                2) ((failed++)) || true ;;
+            esac
+        done
+    done
+
+    echo ""
+    echo -e "Agents: ${GREEN}$installed installed${NC}, ${YELLOW}$skipped unchanged${NC}"
+    if [[ $failed -gt 0 ]]; then
+        echo -e "${RED}$failed failed${NC}"
     fi
 }
 
@@ -1357,6 +1466,7 @@ echo ""
 # Use vault path from questionnaire, or fall back to current directory
 VAULT_DIR="${ANSWERS[vault_path]:-$(pwd)}"
 SKILLS_SOURCE="$(dirname "$0")/skills"
+AGENTS_SOURCE="$(dirname "$0")/agents"
 TEMPLATE_DIR="$(dirname "$0")/templates"
 
 # Validate write permissions to vault directory
@@ -1385,42 +1495,22 @@ else
     echo ""
 fi
 
-# Install skills to user's Claude Code skills directory
+# Initialize state tracking before any installation
+echo "Initializing state tracking..."
+init_state_file
+echo -e "${GREEN}✓${NC} State tracking initialized (~/.minervia/state.json)"
+
+# Install skills and agents to user's Claude Code directory
 SKILLS_TARGET="$HOME/.claude/skills"
+AGENTS_TARGET="$HOME/.claude/agents"
+
 echo ""
 echo "Installing Minervia skills..."
+install_skills "$SKILLS_SOURCE" "$SKILLS_TARGET"
 
-# Create skills directory with error handling
-if ! mkdir -p "$SKILLS_TARGET" 2>/dev/null; then
-    error_exit "Failed to create skills directory: $SKILLS_TARGET" "Check write permissions for $HOME/.claude/"
-fi
-
-# Track skills installed for summary
-skills_installed=0
-skills_skipped=0
-
-for skill_dir in "$SKILLS_SOURCE"/*/; do
-    if [ -d "$skill_dir" ]; then
-        skill_name=$(basename "$skill_dir")
-        target_dir="$SKILLS_TARGET/$skill_name"
-
-        if [ -d "$target_dir" ]; then
-            echo -e "${YELLOW}→${NC} $skill_name (already exists, skipping)"
-            ((skills_skipped++)) || true
-        else
-            if ! cp -r "$skill_dir" "$target_dir" 2>/dev/null; then
-                error_exit "Failed to install skill: $skill_name" "Check disk space and permissions for $SKILLS_TARGET/"
-            fi
-            echo -e "${GREEN}✓${NC} $skill_name"
-            ((skills_installed++)) || true
-        fi
-    fi
-done
-
-# Verify at least some skills exist (either installed now or previously)
-if [[ $skills_installed -eq 0 && $skills_skipped -eq 0 ]]; then
-    error_exit "No skills found in $SKILLS_SOURCE" "Ensure the minervia-starter-kit is complete"
-fi
+echo ""
+echo "Installing Minervia agents..."
+install_agents "$AGENTS_SOURCE" "$AGENTS_TARGET"
 
 # Generate CLAUDE.md from template
 echo ""
@@ -1506,6 +1596,7 @@ echo "2. Start Claude Code: claude"
 echo "3. Try: /log-to-daily after your first session"
 echo ""
 echo "Skills installed to: $SKILLS_TARGET"
+echo "Agents installed to: $AGENTS_TARGET"
 echo ""
 if [ "$FIRST_RUN" = true ]; then
     echo -e "${GREEN}Tip:${NC} Your first Claude session will show a welcome guide!"
