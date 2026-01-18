@@ -4,7 +4,8 @@ set -euo pipefail
 # ============================================================================
 # Minervia Update Utility
 # ============================================================================
-# Self-update mechanism for Minervia installations
+# Installed to: ~/.minervia/bin/minervia-update.sh
+# Invoked via: /minervia:update skill or directly
 # https://github.com/aplaceforallmystuff/minervia-starter-kit
 # ============================================================================
 
@@ -20,6 +21,9 @@ MINERVIA_STATE_DIR="$HOME/.minervia"
 MINERVIA_STATE_FILE="$MINERVIA_STATE_DIR/state.json"
 BACKUP_DIR="$MINERVIA_STATE_DIR/backups"
 TEMP_DIR=""
+
+# Detect script location (works whether invoked from repo or ~/.minervia/bin)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Flags
 DRY_RUN=false

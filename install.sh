@@ -453,6 +453,12 @@ Prerequisites:
   - Bash 4.0 or later
   - Write permissions to current directory
 
+Update:
+  After installation, you can update Minervia:
+  bash ~/.minervia/bin/minervia-update.sh
+
+  Or use the /minervia:update skill in Claude Code.
+
 Uninstall:
   To remove Minervia from your system:
   1. Delete skill directories: rm -rf ~/.claude/skills/minervia-*
@@ -687,6 +693,7 @@ STEP_CLAUDEMD="claudemd"
 STEP_SCAFFOLD="scaffold"
 STEP_SKILLS="skills"
 STEP_AGENTS="agents"
+STEP_UPDATE_SCRIPT="update_script"
 
 # Cross-platform MD5 computation
 # Args: file_path
@@ -1760,6 +1767,44 @@ do_install_agents() {
     install_agents "$AGENTS_SOURCE" "$AGENTS_TARGET"
 }
 
+# ============================================================================
+# Update Script Installation
+# ============================================================================
+
+# Install update script to ~/.minervia/bin/
+install_update_script() {
+    local source_script="$(dirname "$0")/minervia-update.sh"
+    local target_dir="$HOME/.minervia/bin"
+    local target_script="$target_dir/minervia-update.sh"
+
+    if [[ ! -f "$source_script" ]]; then
+        verbose "Update script not found in source directory"
+        return 0
+    fi
+
+    # Create bin directory
+    if ! mkdir -p "$target_dir" 2>/dev/null; then
+        echo -e "${YELLOW}!${NC} Could not create $target_dir"
+        return 1
+    fi
+
+    # Copy update script
+    if cp "$source_script" "$target_script" 2>/dev/null; then
+        chmod +x "$target_script"
+        echo -e "${GREEN}✓${NC} Update script installed"
+        verbose "  Location: $target_script"
+        return 0
+    else
+        echo -e "${YELLOW}!${NC} Failed to install update script"
+        return 1
+    fi
+}
+
+# Wrapper for update script installation step
+do_install_update_script() {
+    install_update_script
+}
+
 # Wrapper for CLAUDE.md generation step
 do_generate_claudemd() {
     echo ""
@@ -1902,6 +1947,7 @@ AGENTS_TARGET="$HOME/.claude/agents"
 # Run installation steps with skip detection for re-runs
 run_step "$STEP_SKILLS" "Installing skills" do_install_skills
 run_step "$STEP_AGENTS" "Installing agents" do_install_agents
+run_step "$STEP_UPDATE_SCRIPT" "Installing update script" do_install_update_script
 run_step "$STEP_CLAUDEMD" "Generating CLAUDE.md" do_generate_claudemd
 
 # Git setup (optional)
