@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 8 of 8 (Update System)
-Plan: 2 of 2 in current phase
+Plan: 3 of 3 in current phase
 Status: Complete
-Last activity: 2026-01-18 - Completed 08-02-PLAN.md
+Last activity: 2026-01-19 - Completed 08-03-PLAN.md
 
 Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15
+- Total plans completed: 16
 - Average duration: 3.7 min
-- Total execution time: 55 min
+- Total execution time: 59 min
 
 **By Phase:**
 
@@ -34,11 +34,11 @@ Progress: [██████████] 100%
 | 05-vault-scaffolding | 2 | 5 min | 2.5 min |
 | 06-skills-installation | 2 | 5 min | 2.5 min |
 | 07-idempotency-and-safety | 2 | 8 min | 4 min |
-| 08-update-system | 2 | 18 min | 9 min |
+| 08-update-system | 3 | 22 min | 7.3 min |
 
 **Recent Trend:**
-- Last 5 plans: 06-02 (2 min), 07-01 (4 min), 07-02 (4 min), 08-01 (13 min), 08-02 (5 min)
-- Trend: Phase 8 had larger tasks (update infrastructure + conflict detection)
+- Last 5 plans: 07-01 (4 min), 07-02 (4 min), 08-01 (13 min), 08-02 (5 min), 08-03 (4 min)
+- Trend: Phase 8 had larger tasks (update infrastructure + conflict detection + skills)
 
 *Updated after each plan completion*
 
@@ -106,6 +106,9 @@ Recent decisions affecting current work:
 - [08-02]: Three merge options: keep mine, take theirs, backup + overwrite
 - [08-02]: Changelog parsing via AWK between version headers
 - [08-02]: Restore requires explicit y/N confirmation
+- [08-03]: Skills invoke bash script directly rather than wrapping logic
+- [08-03]: Update script installed to ~/.minervia/bin/ (not ~/.local/bin)
+- [08-03]: Installation step added after agents installation in flow
 
 ### Pending Todos
 
@@ -118,6 +121,6 @@ None - project complete.
 
 ## Session Continuity
 
-Last session: 2026-01-18T22:53:00Z
-Stopped at: Completed 08-02-PLAN.md - PROJECT COMPLETE
+Last session: 2026-01-19T00:10:00Z
+Stopped at: Completed 08-03-PLAN.md - PROJECT COMPLETE
 Resume file: None
