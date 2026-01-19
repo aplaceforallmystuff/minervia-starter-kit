@@ -8,33 +8,41 @@ A complete end-to-end installer that transforms Claude Code + Obsidian into a "c
 
 After running the installer, Claude actually understands your vault and you're immediately productive — not staring at a blank terminal wondering what to do.
 
+## Current State (v1.0.0)
+
+**Shipped:** 2026-01-19
+**Codebase:** 2,797 lines bash (install.sh + minervia-update.sh), 93 files
+
+### What v1.0 Delivers
+
+- **Interactive onboarding** — 5-question questionnaire with Gum-enhanced UI
+- **Personalized CLAUDE.md** — Template-based generation from user answers
+- **PARA scaffolding** — Complete folder structure with templates and examples
+- **Smart installation** — Checksum-based conflict detection, state.json tracking
+- **Idempotent re-runs** — Step tracking, saved answers, verbose mode
+- **Self-update system** — /minervia:update with customization preservation
+
 ## Requirements
 
-### Validated
+### Validated (v1.0)
 
-*Inferred from existing codebase:*
+- ✓ Installer detects new vs existing vault and adapts — v1.0 (IS_NEW_VAULT flag)
+- ✓ Full onboarding questionnaire captures user context — v1.0 (5 questions with Gum)
+- ✓ PARA folder structure created for new vaults — v1.0 (7 folders)
+- ✓ Templates created for daily notes, projects, areas — v1.0 (Obsidian core syntax)
+- ✓ Example notes demonstrate how to use each PARA section — v1.0 (4 examples)
+- ✓ CLAUDE.md generated from questionnaire answers — v1.0 (template system)
+- ✓ Skills installed to ~/.claude/skills/ with version tracking — v1.0 (state.json)
+- ✓ Customization detection prevents overwriting user changes — v1.0 (MD5 checksums)
+- ✓ /minervia:update command pulls changes and merges carefully — v1.0 (3 strategies)
+- ✓ Semantic versioning via git tags — v1.0
 
-- Skills exist for log-to-daily, weekly-review, think-first, start-project, log-to-project, lessons-learned — existing
-- Agents exist for workflow-coordinator, vault-analyst, aesthetic-definer — existing
-- Basic install.sh copies skills to ~/.claude/skills/ — existing
-- CLAUDE.md template provides vault context — existing
-- /init command detects vault structure — existing
-- First-run experience via SessionStart hook — existing
+### Active (v1.1 Candidates)
 
-### Active
-
-- [ ] Installer detects new vs existing vault and adapts
-- [ ] Full onboarding questionnaire captures user context
-- [ ] PARA folder structure created for new vaults
-- [ ] Templates created for daily notes, projects, areas, resources
-- [ ] Example notes demonstrate how to use each PARA section
-- [ ] CLAUDE.md generated from questionnaire answers
-- [ ] Skills installed to ~/.claude/skills/ with version tracking
-- [ ] Customization detection prevents overwriting user changes
-- [ ] /minervia:update command pulls changes and merges carefully
-- [ ] Guided first session walks through /log-to-daily, /weekly-review
+- [ ] Guided first session walks through /log-to-daily, /vault-stats
 - [ ] MCP server recommendations shown with links to docs
-- [ ] Semantic versioning via git tags
+- [ ] Summary/review step shows what will be created before writing files
+- [ ] Dry-run mode (--dry-run) previews changes without executing
 
 ### Out of Scope
 
@@ -43,15 +51,9 @@ After running the installer, Claude actually understands your vault and you're i
 - Support for non-technical users — semi-technical is the floor
 - Auto-updates without user action — users should control when they update
 - Obsidian plugin format — Claude Code is the interface, not Obsidian plugins
+- Windows support — macOS + Linux first
 
 ## Context
-
-**Existing codebase:**
-- Configuration-driven skill system — Markdown files Claude reads at runtime
-- Skills: log-to-daily, weekly-review, think-first, start-project, log-to-project, lessons-learned, vault-stats
-- Agents: workflow-coordinator, vault-analyst, aesthetic-definer
-- Basic install.sh exists but lacks questionnaire, version tracking, update support
-- /init command exists for vault structure detection
 
 **Target user profile:**
 Semi-technical users comfortable following terminal instructions but who don't want to troubleshoot. They've heard Claude Code is powerful but need hand-holding through setup.
@@ -70,20 +72,22 @@ get-shit-done repo — self-contained workflow system with update mechanisms and
 ## Constraints
 
 - **Tech stack**: Bash for installer (portable), Markdown for skills/agents
-- **Installation target**: ~/.claude/ for skills/agents, vault for CLAUDE.md and structure
+- **Installation target**: ~/.claude/ for skills/agents, ~/.minervia/ for state, vault for CLAUDE.md
 - **Versioning**: Git tags (v1.0.0 format) — no package.json needed
-- **Compatibility**: macOS and Linux (no Windows support for v1)
-- **Dependencies**: Claude Code CLI must be installed first
+- **Compatibility**: macOS and Linux (no Windows support)
+- **Dependencies**: Claude Code CLI must be installed first, Bash 4.0+
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Skills to ~/.claude/, not vault | Global installation simplifies updates, vault stays clean | — Pending |
-| Preserve customizations on update | Users invest time tweaking skills to their workflow | — Pending |
-| Guided first session, not just "done" | Semi-technical users need confidence-building | — Pending |
-| Recommend MCP, don't install | User controls their integrations, reduces failure modes | — Pending |
-| Git tags for versioning | Simple, no npm dependency, works with update command | — Pending |
+| Skills to ~/.claude/, not vault | Global installation simplifies updates, vault stays clean | ✓ Good — works well |
+| State tracking in ~/.minervia/state.json | Enables idempotent re-runs and update tracking | ✓ Good — enables re-run and update |
+| Preserve customizations on update | Users invest time tweaking skills to their workflow | ✓ Good — checksum comparison works |
+| Template-based CLAUDE.md generation | Easier to maintain than heredoc, enables customization | ✓ Good — clean separation |
+| Gum with fallback | Enhanced UX when available, basic prompts always work | ✓ Good — graceful degradation |
+| Update script in ~/.minervia/bin/ | Self-contained, no PATH requirements | ✓ Good — portable |
+| Git tags for versioning | Simple, no npm dependency, works with update command | ✓ Good — clean workflow |
 
 ---
-*Last updated: 2026-01-18 after initialization*
+*Last updated: 2026-01-19 after v1.0.0 milestone*
