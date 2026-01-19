@@ -19,7 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 5: Vault Scaffolding** - PARA structure, templates, examples
 - [x] **Phase 6: Skills Installation** - Copy skills/agents with version tracking
 - [x] **Phase 7: Idempotency and Safety** - Safe re-runs, confirmations, progress
-- [ ] **Phase 8: Update System** - Self-update with customization preservation
+- [x] **Phase 8: Update System** - Self-update with customization preservation
 
 ## Phase Details
 
@@ -142,9 +142,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Update script core: git fetch, version comparison, backup creation, dry-run
-- [ ] 08-02-PLAN.md — Conflict handling: customization detection, merge strategies, changelog, restore
-- [ ] 08-03-PLAN.md — Skills and integration: /minervia:update, /minervia:restore, install.sh wiring
+- [x] 08-01-PLAN.md — Update script core: git fetch, version comparison, backup creation, dry-run
+- [x] 08-02-PLAN.md — Conflict handling: customization detection, merge strategies, changelog, restore
+- [x] 08-03-PLAN.md — Skills and integration: /minervia:update, /minervia:restore, install.sh wiring
 
 ## Progress
 
@@ -160,7 +160,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8
 | 5. Vault Scaffolding | 2/2 | Complete | 2026-01-18 |
 | 6. Skills Installation | 2/2 | Complete | 2026-01-18 |
 | 7. Idempotency and Safety | 2/2 | Complete | 2026-01-18 |
-| 8. Update System | 0/3 | Planning complete | - |
+| 8. Update System | 3/3 | Complete | 2026-01-19 |
 
 ---
 *Roadmap created: 2026-01-18*
