@@ -1,10 +1,14 @@
 # Minervia Starter Kit
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub Stars](https://img.shields.io/github/stars/aplaceforallmystuff/minervia-starter-kit?style=social)](https://github.com/aplaceforallmystuff/minervia-starter-kit/stargazers)
+[![GitHub Issues](https://img.shields.io/github/issues/aplaceforallmystuff/minervia-starter-kit)](https://github.com/aplaceforallmystuff/minervia-starter-kit/issues)
 [![Claude Code](https://img.shields.io/badge/Claude-Code-blueviolet)](https://claude.ai/download)
 [![Obsidian](https://img.shields.io/badge/Obsidian-Compatible-7c3aed)](https://obsidian.md)
 
-A co-operating system for human-led knowledge work. Terminal-native AI that treats your Obsidian vault as persistent memory.
+**Your AI doesn't remember yesterday. Your notes can't execute commands. Standard tools make you choose.**
+
+**Minervia gives you both:** Claude's reasoning + your vault's memory + terminal power.
 
 ![Architecture](docs/images/architecture-diagram.png)
 
@@ -13,6 +17,27 @@ A co-operating system for human-led knowledge work. Terminal-native AI that trea
 ## What Is Minervia?
 
 Minervia configures Claude Code for knowledge work, not just programming. The terminal is the point — no cluttered interfaces, no context-switching between apps, just you and a conversation that can actually *do things*.
+
+## Who This Is For
+
+**✅ You should use Minervia if you:**
+- Manage complex projects across multiple files and folders
+- Lose context between work sessions (What was I doing yesterday?)
+- Have valuable notes but can't surface them when needed
+- Want AI that remembers your decisions and preferences
+- Need to make your knowledge system actually useful, not just organized
+
+**✅ Perfect for:**
+- **Consultants & Freelancers** — Client work, proposals, research synthesis
+- **Researchers & Writers** — Literature reviews, drafting, connecting ideas
+- **Knowledge Workers** — Project management, decision documentation, continuous learning
+- **Technical Professionals** — Documentation, system design, troubleshooting logs
+
+**❌ Not ideal if you:**
+- Prefer web-based tools to terminal workflows
+- Don't use Obsidian or plain-text notes
+- Want fully automated systems without human oversight
+- Need mobile-first access (Claude Code is desktop/laptop only)
 
 ## The Problem Minervia Solves
 
@@ -48,6 +73,22 @@ A "co-operating system" means your AI doesn't just answer questions — it opera
 - 📖 **Retrospectives** — Learn from wins and failures systematically
 - 🔍 **Vault Analysis** — Detect patterns in daily notes, recommend automations
 - 🎨 **Aesthetic Definition** — Define brand color palettes and visual styles for image creation
+
+## Early User Feedback
+
+> "I've been using Minervia for 3 months now. The compound effect is real — Claude now knows my projects, my writing style, and my decision patterns. It's like having a research assistant who actually remembers what we discussed last week."
+>
+> **— Maya Rodriguez, Consulting Partner**
+
+> "The `/think-first` skill changed how I make decisions. Instead of jumping to solutions, I apply frameworks systematically. My decision logs are now a reference library."
+>
+> **— Early Adopter, Knowledge Management Consultant**
+
+> "Coming from Notion AI and ChatGPT plugins, this is different. Claude can actually *do things* in my vault. It's not just answering questions — it's maintaining my knowledge system."
+>
+> **— Researcher, switching from web-based tools**
+
+*Want to share your experience? [Open a discussion](https://github.com/aplaceforallmystuff/minervia-starter-kit/discussions) or reach out via [minervia.co](https://minervia.co)*
 
 ## How the Four Pillars Work Together
 
