@@ -14,6 +14,8 @@
 
 **You lead. AI assists. Your vault remembers.**
 
+> **🔥 Coming from OpenClaw?** OpenClaw gives Claude a mouse. Minervia gives Claude your memory. Both use Claude Code, both are powerful, different use cases. [Jump to comparison →](#from-demo-to-daily-driver)
+
 ## What Is Minervia?
 
 Minervia configures Claude Code for knowledge work, not just programming. The terminal is the point — no cluttered interfaces, no context-switching between apps, just you and a conversation that can actually *do things*.
