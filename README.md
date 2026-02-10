@@ -18,6 +18,26 @@
 
 Minervia configures Claude Code for knowledge work, not just programming. The terminal is the point — no cluttered interfaces, no context-switching between apps, just you and a conversation that can actually *do things*.
 
+## From Demo to Daily Driver
+
+**Heard about OpenClaw?** Impressive, right? Browser automation, visual tasks, Computer Use in action. That's the "wow" factor.
+
+**Minervia is the "use it every day" factor.**
+
+| OpenClaw (Computer Use) | Minervia (Knowledge Work) |
+|-------------------------|---------------------------|
+| 🎬 **Demo-worthy** — Watch AI browse the web | 📝 **Daily utility** — AI that remembers what you did yesterday |
+| 🖱️ **Visual tasks** — Click buttons, fill forms | 🧠 **Knowledge tasks** — Search your notes, compile research, log decisions |
+| ⚡ **Impressive once** — Show your friends | 🔄 **Useful continuously** — Build context that compounds |
+| 🌐 **Web automation** — Scrape, browse, interact | 📁 **Vault automation** — Organize, connect, surface |
+| 🎯 **Specific tasks** — "Book this flight" | 🎯 **Ongoing work** — "What was I working on last week?" |
+
+**Both use Claude. Both run in your terminal. Both are powerful.**
+
+The difference: OpenClaw impresses for 5 minutes. Minervia improves your work for 5 years.
+
+**If OpenClaw got you excited about AI agents, Minervia is what you'll actually use tomorrow morning.**
+
 ## Who This Is For
 
 **✅ You should use Minervia if you:**
