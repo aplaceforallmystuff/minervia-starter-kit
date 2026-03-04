@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-03-04
+
+### Added
+
+- **Safety hooks** — PreToolUse hooks installed to `~/.claude/hooks/`:
+  - `block-dangerous-commands.js` — Blocks catastrophic bash commands (rm ~, dd to disk, fork bombs) and high-risk patterns (curl|bash, force push main, inline credentials)
+  - `protect-secrets.js` — Prevents reading/writing .env files, SSH keys, cloud credentials
+- **antislop skill** — AI writing pattern detection with 20-pattern taxonomy and scoring system
+- **extract-wisdom skill** — Dynamic content insight extraction with 5 depth levels (Instant through Comprehensive)
+- **creation-guard skill** — Duplicate prevention analysis before creating new skills, agents, or commands
+- **systematic-debugging skill** — Four-phase root cause investigation methodology
+- **verification-before-completion skill** — Evidence-before-claims gate for completion assertions
+- **Skill filtering** — New installer questions let users skip writing skills or defensive development skills
+- **Pre-installation summary** — Review all choices before installation begins
+- **`--dry-run` flag** — Preview installation choices without making changes
+- Hooks support in update system — `minervia-update.sh` now detects and updates hook files
+
+### Changed
+
+- CLAUDE.md template enhanced with 5 new standing instructions:
+  - Security note (permissions array credential leakage)
+  - Verification rule (evidence before claims)
+  - Date validation (system clock as source of truth)
+  - Review principle (apply fixes directly)
+  - Enhanced uncertainty protocol (verify numbers/statistics)
+- Installer questionnaire expanded from 5 to 7 questions
+- Welcome message updated to reflect new skills and hooks
+
 ## [1.1.0] - 2026-01-12
 
 ### Added

@@ -196,7 +196,7 @@ is_newer_version() {
 resolve_path() {
     local rel_path="$1"
 
-    if [[ "$rel_path" == skills/* ]] || [[ "$rel_path" == agents/* ]]; then
+    if [[ "$rel_path" == skills/* ]] || [[ "$rel_path" == agents/* ]] || [[ "$rel_path" == hooks/* ]]; then
         echo "$HOME/.claude/$rel_path"
     else
         # Vault files - get vault path from state.json
@@ -464,6 +464,18 @@ scan_for_customizations() {
                     verbose "  New: $rel_path"
                 fi
             done
+        done
+    fi
+
+    # Check for new hooks in remote
+    if [[ -d "$TEMP_DIR/hooks" ]]; then
+        for hook_file in "$TEMP_DIR/hooks"/*.js; do
+            [[ ! -f "$hook_file" ]] && continue
+            local rel_path="hooks/$(basename "$hook_file")"
+            if ! grep -q "\"path\": \"$rel_path\"" "$MINERVIA_STATE_FILE" 2>/dev/null; then
+                NEW_FILES+=("$rel_path")
+                verbose "  New: $rel_path"
+            fi
         done
     fi
 

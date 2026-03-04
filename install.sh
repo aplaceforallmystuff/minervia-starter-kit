@@ -15,7 +15,7 @@ RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 # Version - single source of truth
-readonly VERSION="1.0.0"
+readonly VERSION="1.2.0"
 
 # ============================================================================
 # Gum Detection

@@ -85,16 +85,19 @@ They're stateless. Every conversation starts from zero.
 
 A "co-operating system" means your AI doesn't just answer questions — it operates *within* your knowledge system, making it smarter with every interaction.
 
-### ✨ Features
+### Features
 
-- 📝 **Activity Logging** — Capture session work to daily notes automatically
-- 🎯 **Project Documentation** — Log progress to specific project folders
-- 🔄 **Weekly Reviews** — Process inbox and maintain vault health
-- 🧠 **Decision Frameworks** — Apply mental models before big decisions
-- 🏗️ **Project Templates** — Initialize new projects with proper structure
-- 📖 **Retrospectives** — Learn from wins and failures systematically
-- 🔍 **Vault Analysis** — Detect patterns in daily notes, recommend automations
-- 🎨 **Aesthetic Definition** — Define brand color palettes and visual styles for image creation
+- **Activity Logging** — Capture session work to daily notes automatically
+- **Project Documentation** — Log progress to specific project folders
+- **Weekly Reviews** — Process inbox and maintain vault health
+- **Decision Frameworks** — Apply mental models before big decisions
+- **Project Templates** — Initialize new projects with proper structure
+- **Retrospectives** — Learn from wins and failures systematically
+- **Vault Analysis** — Detect patterns in daily notes, recommend automations
+- **Aesthetic Definition** — Define brand color palettes and visual styles for image creation
+- **Safety Hooks** — Block dangerous commands and protect secrets automatically
+- **Writing Quality** — Detect AI slop patterns and extract wisdom from content
+- **Development Discipline** — Systematic debugging, verification gates, duplicate prevention
 
 ## Early User Feedback
 
@@ -282,13 +285,18 @@ After running the installer, verify skills are available:
 # Check that skills were copied
 ls ~/.claude/skills/
 
-# Expected output:
+# Expected output (core + optional):
 # log-to-daily/
 # log-to-project/
 # lessons-learned/
 # start-project/
 # weekly-review/
 # think-first/
+# antislop/              (if writing skills installed)
+# extract-wisdom/        (if writing skills installed)
+# creation-guard/        (if dev skills installed)
+# systematic-debugging/  (if dev skills installed)
+# verification-before-completion/  (if dev skills installed)
 ```
 
 Start Claude in your vault and test:
@@ -1048,6 +1056,44 @@ Now that you have the basics, add complexity only where you feel friction:
 → Use `/log-to-project` consistently
 
 The system improves as you use it. Don't add everything at once — add what solves actual problems.
+
+## Safety Hooks
+
+Minervia installs two PreToolUse hooks that protect you from common Claude Code foot-guns:
+
+| Hook | What It Blocks |
+|------|---------------|
+| `block-dangerous-commands` | `rm -rf ~/`, force push to main, `curl \| bash`, inline credentials in commands, fork bombs |
+| `protect-secrets` | Reading `.env` files, SSH private keys, cloud credential files |
+
+Hooks are installed to `~/.claude/hooks/` and configured in `~/.claude/settings.json`. They run automatically before tool execution — no action needed from you.
+
+## Optional Skills
+
+The installer lets you choose which optional skill packs to install:
+
+### Writing Skills (optional)
+
+| Skill | What It Does |
+|-------|-------------|
+| `/antislop` | Detects AI writing patterns — banned phrases, staccato fragments, structural tells |
+| `/extract-wisdom` | Extracts key insights from videos, podcasts, articles with 5 depth levels |
+
+### Defensive Development Skills (optional)
+
+| Skill | What It Does |
+|-------|-------------|
+| `/creation-guard` | Searches existing skills/agents before creating new ones — prevents duplicates |
+| `/systematic-debugging` | Four-phase root cause investigation before attempting fixes |
+| `/verification-before-completion` | Requires running verification commands before claiming work is done |
+
+### Dry Run
+
+Preview what the installer will do without making changes:
+
+```bash
+./install.sh --dry-run
+```
 
 ## Extending Minervia
 
