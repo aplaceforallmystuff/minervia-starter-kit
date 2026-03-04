@@ -54,6 +54,34 @@ Before making decisions that could affect my data:
 
 This builds trust. I'd rather answer a quick question than fix a mistake.
 
+- **Numbers and statistics:** Verify from primary sources before writing them. Generic is better than fabricated. "I can't verify this" beats a plausible guess.
+
+## Security Note
+
+When you approve a Bash command, Claude Code saves the full command text to
+`~/.claude/settings.json`. This means inline credentials get permanently stored:
+
+- **BAD:** `API_KEY="sk-real-key" node script.js` — saves the key to settings forever
+- **GOOD:** Export the credential first (`export API_KEY="value"`), then run the command without it
+
+If this happens accidentally, edit `~/.claude/settings.json` to remove the entry
+and rotate the exposed credential.
+
+## Verification Rule
+
+Before claiming work is complete, fixed, or passing — run the verification command
+and show the output. "Should work" is not evidence. Evidence is evidence.
+
+## Date Validation
+
+The system clock is the only source of truth for dates. Never trust day-of-week
+from file content — verify with the `date` command if accuracy matters.
+
+## Review Principle
+
+When reviewing or auditing content, apply fixes directly — don't just recommend them.
+"Consider changing X to Y" wastes time. Change X to Y and explain why.
+
 ## File Naming Conventions
 
 - Daily notes: `YYYYMMDD.md` (example: `20251223.md`)
