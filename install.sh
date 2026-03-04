@@ -227,7 +227,7 @@ PREF_OPTIONS=("Concise responses" "Detailed explanations" "Step-by-step guidance
 
 # Progress tracking
 CURRENT_QUESTION=0
-TOTAL_QUESTIONS=5
+TOTAL_QUESTIONS=7
 
 # Show progress indicator
 show_progress() {
@@ -303,6 +303,18 @@ run_questionnaire() {
     prefs_raw=$(ask_multi "Select preferences:" "${PREF_OPTIONS[@]}")
     ANSWERS[preferences]=$(echo "$prefs_raw" | tr '\n' ',' | sed 's/,$//')
 
+    # Question 6: Writing assistance skills
+    show_progress
+    echo "Would you like AI writing assistance skills?"
+    echo "(Includes AI slop detection and content insight extraction)"
+    ANSWERS[writing_skills]=$(ask_choice "Install writing skills?" "Yes (Recommended)" "No")
+
+    # Question 7: Defensive development skills
+    show_progress
+    echo "Would you like defensive development skills?"
+    echo "(Includes systematic debugging, verification, and duplicate prevention)"
+    ANSWERS[dev_skills]=$(ask_choice "Install defensive skills?" "Yes (Recommended)" "No")
+
     # Summary and confirmation handled by confirm_summary
     if ! confirm_summary; then
         # User chose "Start over"
@@ -327,6 +339,8 @@ show_summary() {
     echo "3) Role:        ${ANSWERS[role]}"
     echo "4) Key areas:   ${ANSWERS[areas]:-None selected}"
     echo "5) Preferences: ${ANSWERS[preferences]:-None selected}"
+    echo "6) Writing skills: ${ANSWERS[writing_skills]:-Yes (Recommended)}"
+    echo "7) Dev skills:     ${ANSWERS[dev_skills]:-Yes (Recommended)}"
     echo ""
 }
 
@@ -568,6 +582,7 @@ CLI_AREAS=""
 CLI_PREFERENCES=""
 SKIP_QUESTIONNAIRE=false
 VERBOSE=false
+DRY_RUN=false
 
 # Parse command-line arguments
 # Runs BEFORE any other checks to allow --help/--version without prerequisites
@@ -604,6 +619,9 @@ parse_args() {
                 ;;
             --no-questionnaire)
                 SKIP_QUESTIONNAIRE=true
+                ;;
+            --dry-run)
+                DRY_RUN=true
                 ;;
             -v|--verbose)
                 VERBOSE=true
@@ -694,6 +712,7 @@ STEP_SCAFFOLD="scaffold"
 STEP_SKILLS="skills"
 STEP_AGENTS="agents"
 STEP_UPDATE_SCRIPT="update_script"
+STEP_HOOKS="hooks"
 
 # Cross-platform MD5 computation
 # Args: file_path
@@ -889,12 +908,14 @@ save_questionnaire_answers() {
     TEMP_FILES+=("$temp_file")
 
     # Build answers JSON (escape special characters in values)
-    local name_escaped role_escaped areas_escaped prefs_escaped vault_escaped
+    local name_escaped role_escaped areas_escaped prefs_escaped vault_escaped writing_escaped dev_escaped
     name_escaped=$(printf '%s' "${ANSWERS[name]:-}" | sed 's/"/\\"/g')
     role_escaped=$(printf '%s' "${ANSWERS[role]:-}" | sed 's/"/\\"/g')
     areas_escaped=$(printf '%s' "${ANSWERS[areas]:-}" | sed 's/"/\\"/g')
     prefs_escaped=$(printf '%s' "${ANSWERS[preferences]:-}" | sed 's/"/\\"/g')
     vault_escaped=$(printf '%s' "${ANSWERS[vault_path]:-}" | sed 's/"/\\"/g')
+    writing_escaped=$(printf '%s' "${ANSWERS[writing_skills]:-Yes (Recommended)}" | sed 's/"/\\"/g')
+    dev_escaped=$(printf '%s' "${ANSWERS[dev_skills]:-Yes (Recommended)}" | sed 's/"/\\"/g')
 
     # Check if questionnaire_answers already exists
     if grep -q '"questionnaire_answers"' "$MINERVIA_STATE_FILE" 2>/dev/null; then
@@ -913,7 +934,9 @@ save_questionnaire_answers() {
     "vault_path": "$vault_escaped",
     "role": "$role_escaped",
     "areas": "$areas_escaped",
-    "preferences": "$prefs_escaped"
+    "preferences": "$prefs_escaped",
+    "writing_skills": "$writing_escaped",
+    "dev_skills": "$dev_escaped"
   }
 }
 ANSWERS_JSON
@@ -926,7 +949,9 @@ ANSWERS_JSON
     "vault_path": "$vault_escaped",
     "role": "$role_escaped",
     "areas": "$areas_escaped",
-    "preferences": "$prefs_escaped"
+    "preferences": "$prefs_escaped",
+    "writing_skills": "$writing_escaped",
+    "dev_skills": "$dev_escaped"
   }
 }
 ANSWERS_JSON
@@ -953,6 +978,8 @@ load_saved_answers() {
     ANSWERS[role]=$(awk -F'"' '/"role":/ {print $4}' "$MINERVIA_STATE_FILE" | head -1)
     ANSWERS[areas]=$(awk -F'"' '/"areas":/ {print $4}' "$MINERVIA_STATE_FILE" | head -1)
     ANSWERS[preferences]=$(awk -F'"' '/"preferences":/ {print $4}' "$MINERVIA_STATE_FILE" | head -1)
+    ANSWERS[writing_skills]=$(awk -F'"' '/"writing_skills":/ {print $4}' "$MINERVIA_STATE_FILE" | head -1)
+    ANSWERS[dev_skills]=$(awk -F'"' '/"dev_skills":/ {print $4}' "$MINERVIA_STATE_FILE" | head -1)
 }
 
 # Handle re-run with existing saved answers
@@ -1133,6 +1160,22 @@ install_skills() {
         local skill_name
         skill_name=$(basename "$skill_dir")
 
+        # Check if skill should be skipped (optional skill packs)
+        if [[ -n "${MINERVIA_SKIP_SKILLS:-}" ]]; then
+            local skip=false
+            for skip_name in ${MINERVIA_SKIP_SKILLS}; do
+                if [[ "$skill_name" == "$skip_name" ]]; then
+                    skip=true
+                    break
+                fi
+            done
+            if $skip; then
+                echo -e "${YELLOW}→${NC} $skill_name (skipped — not selected)"
+                ((skipped++)) || true
+                continue
+            fi
+        fi
+
         # Loop through files in skill directory
         for file in "$skill_dir"*; do
             if [[ ! -f "$file" ]]; then
@@ -1218,6 +1261,80 @@ install_agents() {
     if [[ $failed -gt 0 ]]; then
         echo -e "${RED}$failed failed${NC}"
     fi
+}
+
+# ============================================================================
+# Hooks Installation Functions
+# ============================================================================
+
+# Install safety hooks to ~/.claude/hooks/ and configure in settings.json
+do_install_hooks() {
+    local hooks_source
+    hooks_source="$(dirname "$0")/hooks"
+    local hooks_target="$HOME/.claude/hooks"
+
+    if [[ ! -d "$hooks_source" ]]; then
+        echo -e "${YELLOW}!${NC} Hooks directory not found (skipping)"
+        return 0
+    fi
+
+    mkdir -p "$hooks_target" 2>/dev/null || true
+
+    local installed=0
+    for hook_file in "$hooks_source"/*.js; do
+        [[ ! -f "$hook_file" ]] && continue
+        local filename
+        filename=$(basename "$hook_file")
+        local target_path="$hooks_target/$filename"
+
+        install_single_file "$hook_file" "$target_path" "hook: $filename" "hooks/$filename"
+        local result=$?
+        [[ $result -eq 0 ]] && ((installed++)) || true
+    done
+
+    # Configure hooks in global settings.json
+    configure_hooks_settings
+
+    echo ""
+    echo -e "Hooks: ${GREEN}$installed installed${NC}"
+}
+
+# Add hook entries to ~/.claude/settings.json (global)
+configure_hooks_settings() {
+    local settings_file="$HOME/.claude/settings.json"
+
+    # If no settings.json exists, create one with hooks
+    if [[ ! -f "$settings_file" ]]; then
+        mkdir -p "$HOME/.claude" 2>/dev/null || true
+        cat > "$settings_file" << 'HOOKS_JSON'
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "node ~/.claude/hooks/block-dangerous-commands.js" }]
+      },
+      {
+        "matcher": "Read|Edit|Write|Bash",
+        "hooks": [{ "type": "command", "command": "node ~/.claude/hooks/protect-secrets.js" }]
+      }
+    ]
+  }
+}
+HOOKS_JSON
+        echo -e "${GREEN}✓${NC} Hook configuration created"
+        return 0
+    fi
+
+    # Settings exists — check if our hooks are already configured
+    if grep -q "block-dangerous-commands" "$settings_file" 2>/dev/null; then
+        echo -e "${YELLOW}→${NC} Hook configuration (already present)"
+        return 0
+    fi
+
+    # Settings exists but no Minervia hooks — warn user to add manually
+    echo -e "${YELLOW}!${NC} ~/.claude/settings.json already exists"
+    echo "    Add Minervia hooks manually. See: https://github.com/aplaceforallmystuff/minervia-starter-kit#hooks"
 }
 
 # Platform-specific command wrappers
@@ -1757,7 +1874,28 @@ check_optional_command() {
 do_install_skills() {
     echo ""
     echo "Installing Minervia skills..."
+
+    # Build skip list based on questionnaire answers
+    local -a SKIP_SKILLS=()
+
+    # Writing skills: antislop, extract-wisdom
+    local writing_answer="${ANSWERS[writing_skills]:-Yes (Recommended)}"
+    if [[ "$writing_answer" == "No" ]]; then
+        SKIP_SKILLS+=("antislop" "extract-wisdom")
+    fi
+
+    # Dev skills: creation-guard, systematic-debugging, verification-before-completion
+    local dev_answer="${ANSWERS[dev_skills]:-Yes (Recommended)}"
+    if [[ "$dev_answer" == "No" ]]; then
+        SKIP_SKILLS+=("creation-guard" "systematic-debugging" "verification-before-completion")
+    fi
+
+    if [[ ${#SKIP_SKILLS[@]} -gt 0 ]]; then
+        export MINERVIA_SKIP_SKILLS="${SKIP_SKILLS[*]}"
+    fi
+
     install_skills "$SKILLS_SOURCE" "$SKILLS_TARGET"
+    unset MINERVIA_SKIP_SKILLS
 }
 
 # Wrapper for agents installation step
@@ -1886,6 +2024,48 @@ fi
 # Save answers for future re-runs
 save_questionnaire_answers
 
+# Pre-installation summary
+echo ""
+echo "======================================="
+echo "The following will be installed:"
+echo "======================================="
+echo ""
+echo -e "  ${GREEN}✓${NC} Core skills → ~/.claude/skills/"
+
+local writing_answer="${ANSWERS[writing_skills]:-Yes (Recommended)}"
+if [[ "$writing_answer" != "No" ]]; then
+    echo -e "  ${GREEN}✓${NC} 2 writing skills → ~/.claude/skills/ (antislop, extract-wisdom)"
+else
+    echo -e "  ${YELLOW}–${NC} Writing skills (skipped)"
+fi
+
+local dev_answer="${ANSWERS[dev_skills]:-Yes (Recommended)}"
+if [[ "$dev_answer" != "No" ]]; then
+    echo -e "  ${GREEN}✓${NC} 3 defensive skills → ~/.claude/skills/"
+else
+    echo -e "  ${YELLOW}–${NC} Defensive skills (skipped)"
+fi
+
+echo -e "  ${GREEN}✓${NC} Agents → ~/.claude/agents/"
+echo -e "  ${GREEN}✓${NC} 2 safety hooks → ~/.claude/hooks/"
+echo -e "  ${GREEN}✓${NC} CLAUDE.md → ${ANSWERS[vault_path]}/CLAUDE.md"
+if [[ "$IS_NEW_VAULT" == "true" ]] 2>/dev/null || [[ ! -d "${ANSWERS[vault_path]}/01 Inbox" ]]; then
+    echo -e "  ${GREEN}✓${NC} PARA folders → ${ANSWERS[vault_path]}/ (new vault)"
+fi
+echo ""
+
+if [[ "$DRY_RUN" == "true" ]]; then
+    echo -e "${YELLOW}DRY RUN:${NC} No files will be written."
+    echo ""
+    echo "Run without --dry-run to install."
+    exit 0
+fi
+
+if ! ask_confirm "Proceed with installation?" "y"; then
+    echo "Installation cancelled."
+    exit 0
+fi
+
 echo ""
 echo "Installing Minervia..."
 echo ""
@@ -1947,6 +2127,7 @@ AGENTS_TARGET="$HOME/.claude/agents"
 # Run installation steps with skip detection for re-runs
 run_step "$STEP_SKILLS" "Installing skills" do_install_skills
 run_step "$STEP_AGENTS" "Installing agents" do_install_agents
+run_step "$STEP_HOOKS" "Installing safety hooks" do_install_hooks
 run_step "$STEP_UPDATE_SCRIPT" "Installing update script" do_install_update_script
 run_step "$STEP_CLAUDEMD" "Generating CLAUDE.md" do_generate_claudemd
 
@@ -1983,7 +2164,7 @@ if [ ! -f ".claude/settings.json" ]; then
         "hooks": [
           {
             "type": "command",
-            "command": "[ -f .minervia-first-run ] && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"\\n🦉 Welcome to Minervia!\\n\\nThis vault is configured for human-led knowledge work with AI assistance.\\n\\n**Quick Start:**\\n- Describe what you are working on\\n- Use /log-to-daily before ending your session\\n- Run /weekly-review to maintain vault health\\n\\n**Available Skills:** /log-to-daily, /log-to-project, /start-project, /weekly-review, /think-first, /lessons-learned, /vault-stats\\n\\nEdit CLAUDE.md to customize your vault configuration.\\n\"}}' && rm .minervia-first-run || true"
+            "command": "[ -f .minervia-first-run ] && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"SessionStart\",\"additionalContext\":\"\\n🦉 Welcome to Minervia!\\n\\nThis vault is configured for human-led knowledge work with AI assistance.\\nSafety hooks are active — they will warn you before dangerous commands.\\n\\n**Quick Start:**\\n- Describe what you are working on\\n- Use /log-to-daily before ending your session\\n- Run /weekly-review to maintain vault health\\n\\n**Available Skills:** /log-to-daily, /log-to-project, /start-project, /weekly-review, /think-first, /lessons-learned, /vault-stats, /antislop, /extract-wisdom\\n\\nEdit CLAUDE.md to customize your vault configuration.\\n\"}}' && rm .minervia-first-run || true"
           }
         ]
       }
