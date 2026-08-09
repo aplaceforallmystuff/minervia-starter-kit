@@ -1,6 +1,16 @@
 # CLAUDE.md
 
-This file provides context to Claude Code when working in this vault.
+> **⛔ THIS IS SHIPPED PRODUCT CONTENT, NOT INSTRUCTIONS FOR THIS REPOSITORY.**
+>
+> This is the rendered **example/reference copy** of `templates/CLAUDE.md.template` — the file
+> `install.sh` personalises into an *end user's Obsidian vault*. It is kept in sync with the
+> template deliberately (see `docs/plans/2026-03-04-v1.1-implementation-plan.md:373`).
+>
+> **`minervia-starter-kit` is not a vault.** It is a bash installer + skills/agents/hooks
+> distribution. If you are an agent working *on this repository*, ignore everything below —
+> it describes the customer's vault, not this codebase. Read `README.md` and `install.sh` instead.
+>
+> Edit this file only to keep it matching `templates/CLAUDE.md.template`.
 
 ## Vault Overview
 
